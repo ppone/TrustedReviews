@@ -5,6 +5,33 @@ import (
 	"testing"
 )
 
+func TestListAllTables(t *testing.T) {
+	//tableList := []string{"places","places-"}
+	factTableCheck := map[string]int{
+
+		"places":              1,
+		"places-edge":         1,
+		"place-categories":    1,
+		"restaurants-us":      1,
+		"restaurants-us-edge": 1,
+		"restaurants-gb":      1,
+		"hotels-us":           1,
+		"world-geographies":   1,
+		"crosswalk":           1,
+		"products-cpg":        1,
+		"products-crosswalk":  1,
+	}
+
+	tablesToCheck := ListAllTables()
+
+	for _, tables := range tablesToCheck {
+		_, ok := factTableCheck[tables]
+		errMessage := "Checking if the list of all tables is correct, table = " + tables
+		assertEqual(ok, true, t, errMessage)
+	}
+
+}
+
 var jsonTestErrorMessage = "Error while testing toJson Method"
 
 func TestCreateTablePlaces(t *testing.T) {
