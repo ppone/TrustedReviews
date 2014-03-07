@@ -6,7 +6,7 @@ import (
 
 func TestListAllTables(t *testing.T) {
 	//tableList := []string{"places","places-"}
-	factTableCheck := map[string]int{
+	FactTableCheck := map[string]int{
 
 		"places":              1,
 		"places-edge":         1,
@@ -24,7 +24,7 @@ func TestListAllTables(t *testing.T) {
 	tablesToCheck := ListAllTables()
 
 	for _, tables := range tablesToCheck {
-		_, ok := factTableCheck[tables]
+		_, ok := FactTableCheck[tables]
 		errMessage := "Checking if the list of all tables is correct, table = " + tables
 		assertEqual(ok, true, t, errMessage)
 	}
@@ -41,7 +41,7 @@ func TestCreateTablePlaces(t *testing.T) {
 	testToJsonTablePlaces(tab, t)
 }
 
-func testToJsonTablePlaces(tab factTable, t *testing.T) {
+func testToJsonTablePlaces(tab FactTable, t *testing.T) {
 	assertEqual("/t/places", tab.ToJson(), t, jsonTestErrorMessage)
 }
 
@@ -52,7 +52,7 @@ func TestCreateTablePlacesEdge(t *testing.T) {
 	testToJsonTablePlacesEdge(tab, t)
 }
 
-func testToJsonTablePlacesEdge(tab factTable, t *testing.T) {
+func testToJsonTablePlacesEdge(tab FactTable, t *testing.T) {
 	assertEqual("/t/places-edge", tab.ToJson(), t, jsonTestErrorMessage)
 }
 
@@ -63,7 +63,7 @@ func TestCreateTablePlacesCategories(t *testing.T) {
 	testToJsonTablePlacesCategories(tab, t)
 }
 
-func testToJsonTablePlacesCategories(tab factTable, t *testing.T) {
+func testToJsonTablePlacesCategories(tab FactTable, t *testing.T) {
 	assertEqual("/t/place-categories", tab.ToJson(), t, jsonTestErrorMessage)
 }
 
@@ -74,7 +74,7 @@ func TestCreateTableRestaurantsUS(t *testing.T) {
 	testToJsonTableRestaurantsUS(tab, t)
 }
 
-func testToJsonTableRestaurantsUS(tab factTable, t *testing.T) {
+func testToJsonTableRestaurantsUS(tab FactTable, t *testing.T) {
 	assertEqual("/t/restaurants-us", tab.ToJson(), t, jsonTestErrorMessage)
 }
 
@@ -85,7 +85,7 @@ func TestCreateTableRestaurantsUSEdge(t *testing.T) {
 	testToJsonTableRestaurantsUSEdge(tab, t)
 }
 
-func testToJsonTableRestaurantsUSEdge(tab factTable, t *testing.T) {
+func testToJsonTableRestaurantsUSEdge(tab FactTable, t *testing.T) {
 	assertEqual("/t/restaurants-us-edge", tab.ToJson(), t, jsonTestErrorMessage)
 }
 
@@ -96,7 +96,7 @@ func TestCreateTableRestaurantsUSGb(t *testing.T) {
 	testToJsonTableRestaurantsUSGb(tab, t)
 }
 
-func testToJsonTableRestaurantsUSGb(tab factTable, t *testing.T) {
+func testToJsonTableRestaurantsUSGb(tab FactTable, t *testing.T) {
 	assertEqual("/t/restaurants-gb", tab.ToJson(), t, jsonTestErrorMessage)
 }
 
@@ -107,7 +107,7 @@ func TestCreateTableHotelsUs(t *testing.T) {
 	testToJsonTableHotelsUs(tab, t)
 }
 
-func testToJsonTableHotelsUs(tab factTable, t *testing.T) {
+func testToJsonTableHotelsUs(tab FactTable, t *testing.T) {
 	assertEqual("/t/hotels-us", tab.ToJson(), t, jsonTestErrorMessage)
 }
 
@@ -118,7 +118,7 @@ func TestCreateTableWorldGeographies(t *testing.T) {
 	testToJsonTableWorldGeographies(tab, t)
 }
 
-func testToJsonTableWorldGeographies(tab factTable, t *testing.T) {
+func testToJsonTableWorldGeographies(tab FactTable, t *testing.T) {
 	assertEqual("/t/world-geographies", tab.ToJson(), t, jsonTestErrorMessage)
 }
 
@@ -129,7 +129,7 @@ func TestCreateTableCrosswalk(t *testing.T) {
 	testToJsonTableCrosswalk(tab, t)
 }
 
-func testToJsonTableCrosswalk(tab factTable, t *testing.T) {
+func testToJsonTableCrosswalk(tab FactTable, t *testing.T) {
 	assertEqual("/t/crosswalk", tab.ToJson(), t, jsonTestErrorMessage)
 }
 
@@ -140,7 +140,7 @@ func TestCreateTableProductsCpg(t *testing.T) {
 	testToJsonTableProductsCpg(tab, t)
 }
 
-func testToJsonTableProductsCpg(tab factTable, t *testing.T) {
+func testToJsonTableProductsCpg(tab FactTable, t *testing.T) {
 	assertEqual("/t/products-cpg", tab.ToJson(), t, jsonTestErrorMessage)
 }
 
@@ -151,7 +151,7 @@ func TestCreateTableProductsCrosswalk(t *testing.T) {
 	testToJsonTableProductsCrosswalk(tab, t)
 }
 
-func testToJsonTableProductsCrosswalk(tab factTable, t *testing.T) {
+func testToJsonTableProductsCrosswalk(tab FactTable, t *testing.T) {
 	assertEqual("/t/products-crosswalk", tab.ToJson(), t, jsonTestErrorMessage)
 }
 

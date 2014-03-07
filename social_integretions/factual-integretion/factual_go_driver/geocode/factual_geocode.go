@@ -4,6 +4,10 @@ import (
 	"encoding/json"
 )
 
+type GeoShape interface {
+	ToJson() (string, error)
+}
+
 type geoPoint struct {
 	Point [2]float64 `json:"$point"`
 }
@@ -21,20 +25,20 @@ type geoRectangle struct {
 	Rect [2][2]float64 `json:"$rect"`
 }
 
-func NewGeoPoint(longitude, latitude float64) geopoint {
+func NewGeoPoint(longitude, latitude float64) geoPoint {
 	location := [2]float64{longitude, latitude}
-	return geopoint{location}
+	return geoPoint{location}
 }
 
-func NewGeoCircle(longitude, latitude float64, radius int16) geocircle {
+func NewGeoCircle(longitude, latitude float64, radius int16) geoCircle {
 	location := [2]float64{longitude, latitude}
-	geocirclec := geocirclecenter{location, radius}
-	return geocircle{geocirclec}
+	geocirclec := geoCircleCenter{location, radius}
+	return geoCircle{geocirclec}
 }
 
-func NewGeoRectangle(topRightLongitude, topRightLatitude, leftBottomLongitude, leftBottomLatitude float64) georectangle {
+func NewGeoRectangle(topRightLongitude, topRightLatitude, leftBottomLongitude, leftBottomLatitude float64) geoRectangle {
 	rectangle := [2][2]float64{{topRightLongitude, topRightLatitude}, {leftBottomLongitude, leftBottomLatitude}}
-	return georectangle{rectangle}
+	return geoRectangle{rectangle}
 }
 
 func (GeoPoint geoPoint) ToJson() (string, error) {
