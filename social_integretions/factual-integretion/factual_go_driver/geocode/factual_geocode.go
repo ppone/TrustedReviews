@@ -5,7 +5,7 @@ import (
 )
 
 type GeoShape interface {
-	ToJson() (string, error)
+	ToJsonFromGeo() (string, error)
 }
 
 type geoPoint struct {
@@ -41,7 +41,7 @@ func NewGeoRectangle(topRightLongitude, topRightLatitude, leftBottomLongitude, l
 	return geoRectangle{rectangle}
 }
 
-func (GeoPoint geoPoint) ToJson() (string, error) {
+func (GeoPoint geoPoint) ToJsonFromGeo() (string, error) {
 	jsonecoded, err := json.Marshal(GeoPoint)
 
 	if err != nil {
@@ -51,7 +51,7 @@ func (GeoPoint geoPoint) ToJson() (string, error) {
 	return "geo=" + string(jsonecoded), nil
 }
 
-func (GeoCircle geoCircle) ToJson() (string, error) {
+func (GeoCircle geoCircle) ToJsonFromGeo() (string, error) {
 	jsonecoded, err := json.Marshal(GeoCircle)
 
 	if err != nil {
@@ -61,7 +61,7 @@ func (GeoCircle geoCircle) ToJson() (string, error) {
 	return "geo=" + string(jsonecoded), nil
 }
 
-func (GeoRect geoRectangle) ToJson() (string, error) {
+func (GeoRect geoRectangle) ToJsonFromGeo() (string, error) {
 	jsonecoded, err := json.Marshal(GeoRect)
 
 	if err != nil {
