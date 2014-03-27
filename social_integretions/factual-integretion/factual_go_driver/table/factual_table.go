@@ -39,7 +39,7 @@ func NewTable(tableName string) (FactTable, error) {
 		return value, nil
 	}
 
-	return FactTable{}, errors.New("The table you entered " + tableName + " in not in the list of tables; see ListAllTables ")
+	return FactTable{}, errors.New("The table you entered " + tableName + " is not in the list of tables; see ListAllTables ")
 
 }
 
