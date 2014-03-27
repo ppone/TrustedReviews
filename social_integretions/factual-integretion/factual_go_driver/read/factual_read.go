@@ -22,10 +22,11 @@ func NewRead(tableName string) (*Read, error) {
 	tab, err := table.NewTable(tableName)
 
 	if err != nil {
-		return nil, errors.New("Could not create new Read due to error creating a new table")
+		fmt.Println(err)
+		return nil, errors.New("Could not create new Read due to error creating a new table => ")
 	}
 
-	read := &Read{}
+	read := new(Read)
 	read.fact_table = tab
 
 	return read, nil
@@ -42,7 +43,7 @@ func (R *Read) AddFilters(filters string) *Read {
 	return R
 }
 func (R *Read) AddLimit(limit int) *Read {
-	R.filters = filters
+	R.limit = limit
 	return R
 }
 
@@ -61,22 +62,18 @@ func (R *Read) AddGeoRectangle(topRightLongitude, topRightLatitude, leftBottomLo
 	return R
 }
 
-func (R *Read) AddGeo(geoType string) *Read {
-	R.filters = filters
-	return R
+func (R *Read) ToJsonFromGeo() (string, error) {
+	return "", nil
 }
 
-func (R *Read) ToJson() (string, error) {
-
-}
 func main() {
 
-	r := read{}
-	r.query = "hello world"
-	r.limit = 34
-	r.fact_table, _ = table.NewTable("places")
-	r.geo = geocode.NewGeoPoint(324.1, 213.23)
+	r, err := NewRead("restaurants-us")
+	if err != nil {
+		fmt.Println(err)
+	}
+	r.AddQuery("query").AddFilters("filters").AddLimit(6)
 
-	fmt.Println(r)
+	fmt.Println(r.fact_table.ToJson())
 
 }
