@@ -1,4 +1,4 @@
-package places
+package places_edge
 
 import (
 	"reflect"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestAllAtributesAreCorrect(t *testing.T) {
-	dummyStruct := new(placesData)
+	dummyStruct := new(placesDataEdge)
 	val := reflect.ValueOf(dummyStruct).Elem()
 
 	assertEqual(val.Type().Field(0).Name, "factual_id", t, "Field name does not match ")
@@ -24,16 +24,16 @@ func TestAllAtributesAreCorrect(t *testing.T) {
 	assertEqual(val.Type().Field(4).Name, "locality", t, "Field name does not match ")
 	assertEqual(val.Type().Field(4).Type.String(), "string", t, "Field type does not match ")
 
-	assertEqual(val.Type().Field(5).Name, "region", t, "Field name does not match ")
+	assertEqual(val.Type().Field(5).Name, "neighborhood", t, "Field name does not match ")
 	assertEqual(val.Type().Field(5).Type.String(), "string", t, "Field type does not match ")
 
-	assertEqual(val.Type().Field(6).Name, "postcode", t, "Field name does not match ")
+	assertEqual(val.Type().Field(6).Name, "region", t, "Field name does not match ")
 	assertEqual(val.Type().Field(6).Type.String(), "string", t, "Field type does not match ")
 
-	assertEqual(val.Type().Field(7).Name, "country", t, "Field name does not match ")
+	assertEqual(val.Type().Field(7).Name, "postcode", t, "Field name does not match ")
 	assertEqual(val.Type().Field(7).Type.String(), "string", t, "Field type does not match ")
 
-	assertEqual(val.Type().Field(8).Name, "neighborhood", t, "Field name does not match ")
+	assertEqual(val.Type().Field(8).Name, "country", t, "Field name does not match ")
 	assertEqual(val.Type().Field(8).Type.String(), "string", t, "Field type does not match ")
 
 	assertEqual(val.Type().Field(9).Name, "tel", t, "Field name does not match ")
@@ -57,29 +57,29 @@ func TestAllAtributesAreCorrect(t *testing.T) {
 	assertEqual(val.Type().Field(15).Name, "hours_display", t, "Field name does not match ")
 	assertEqual(val.Type().Field(15).Type.String(), "string", t, "Field type does not match ")
 
-	assertEqual(val.Type().Field(16).Name, "chain_name", t, "Field name does not match ")
+	assertEqual(val.Type().Field(16).Name, "chain_id", t, "Field name does not match ")
 	assertEqual(val.Type().Field(16).Type.String(), "string", t, "Field type does not match ")
 
 	assertEqual(val.Type().Field(17).Name, "email", t, "Field name does not match ")
 	assertEqual(val.Type().Field(17).Type.String(), "string", t, "Field type does not match ")
 
+	assertEqual(val.Type().Field(18).Name, "category_label", t, "Field name does not match ")
+	assertEqual(val.Type().Field(18).Type.String(), "string", t, "Field type does not match ")
+
 	assertEqual(val.Type().Field(19).Name, "post_town", t, "Field name does not match ")
 	assertEqual(val.Type().Field(19).Type.String(), "string", t, "Field type does not match ")
 
-	assertEqual(val.Type().Field(20).Name, "category_ids", t, "Field name does not match ")
-	assertEqual(val.Type().Field(20).Type.String(), "int", t, "Field type does not match ")
+	assertEqual(val.Type().Field(20).Name, "chain_name", t, "Field name does not match ")
+	assertEqual(val.Type().Field(20).Type.String(), "string", t, "Field type does not match ")
 
 	assertEqual(val.Type().Field(21).Name, "admin_region", t, "Field name does not match ")
 	assertEqual(val.Type().Field(21).Type.String(), "string", t, "Field type does not match ")
 
-	assertEqual(val.Type().Field(22).Name, "chain_id", t, "Field name does not match ")
-	assertEqual(val.Type().Field(22).Type.String(), "string", t, "Field type does not match ")
+	assertEqual(val.Type().Field(22).Name, "category_ids", t, "Field name does not match ")
+	assertEqual(val.Type().Field(22).Type.String(), "int", t, "Field type does not match ")
 
-	assertEqual(val.Type().Field(23).Name, "hours", t, "Field name does not match ")
+	assertEqual(val.Type().Field(23).Name, "po_box", t, "Field name does not match ")
 	assertEqual(val.Type().Field(23).Type.String(), "string", t, "Field type does not match ")
-
-	assertEqual(val.Type().Field(24).Name, "po_box", t, "Field name does not match ")
-	assertEqual(val.Type().Field(24).Type.String(), "string", t, "Field type does not match ")
 
 }
 

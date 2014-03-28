@@ -1,4 +1,4 @@
-package places
+package restaurants_us_test
 
 import (
 	"reflect"

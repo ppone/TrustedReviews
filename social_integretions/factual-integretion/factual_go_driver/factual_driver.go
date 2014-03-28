@@ -8,6 +8,8 @@ import "io/ioutil"
 
 //import "strings"
 
+const VERSION = "V3"
+
 type FactualQuery struct {
 	query string
 	limit int
