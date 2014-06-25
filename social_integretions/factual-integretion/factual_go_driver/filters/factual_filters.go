@@ -1,18 +1,21 @@
-package main
+package filters
 
-import (
-	"fmt"
-)
-
-var filters = map[string]string{
-	"$blank":    "$blank",
-	"$bw":       "$bw",
-	"$bwin":     "$bwin",
-	"$eq":       "$eq",
-	"$excludes": "$excludes",
+func Blank(keyword string, b bool) string {
+	if b == true {
+		return keyword + ":" + "{\"$blank\":true}"
+	} else {
+		return keyword + ":" + "{\"$blank\":false}"
+	}
 }
 
-func main() {
-	fmt.Println("hello")
+func BeginsWith(keyword string, value string) string {
+
+	return "{" + "\"" + keyword + ":" + "{\"bw\":\"" + value + "\"}}"
+
+}
+
+func BeginsWithAny(keyword string, values ...string) string {
+
+	return "{" + "\"" + keyword + ":" + "{\"$blank\":true}" + "}"
 
 }
