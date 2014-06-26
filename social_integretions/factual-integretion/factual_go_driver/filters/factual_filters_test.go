@@ -1,12 +1,16 @@
 package filters
 
 import (
-	"reflect"
+	"fmt"
 	"testing"
 )
 
 func TestAllAtributesAreCorrect(t *testing.T) {
-	dummyStruct := new(placesData)
+
+	r := returnArrayString([]string{"ab", "bc"})
+	fmt.Println(BeginsWithAny("pw", "gf", "rt"))
+	fmt.Println(EqualTo("jiffy", 232332432.2342335))
+	assertEqual("[\"ab\",\"bc\"]", r, t, "Did not make string array correctly")
 
 }
 
