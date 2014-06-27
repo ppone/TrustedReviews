@@ -12,11 +12,16 @@ func floatToString(f float64) string {
 }
 
 func intToString(i int) string {
-	return strconv.Itoa(v)
+	return strconv.Itoa(i)
 }
 
-func returnArrayString(values []interface{}, jsonType string) (string, error) {
+func returnArrayString(valueBox interface{}) (string, error) {
 
+	jsonType, err := checkTypesInArrayAreStringOrNumeric(valueBox)
+	if err != nil {
+		return "", err
+	}
+	values := valueBox.([]interface{})
 	toArray := "["
 	for _, s := range values {
 		if jsonType == "string" {
@@ -43,10 +48,11 @@ func returnArrayString(values []interface{}, jsonType string) (string, error) {
 	return toArray, nil
 }
 
-func checkTypesInArrayAreStringOrNumeric(values []interface{}) (string, error) {
+func checkTypesInArrayAreStringOrNumeric(valueBox interface{}) (string, error) {
 	//Get the first type of the first value
+	values := valueBox.([]interface{})
 	firstValueType := reflect.TypeOf(values[0]).String()
-	fmt.Println("first type is ", firstValueType)
+
 	for _, value := range values {
 		if firstValueType != reflect.TypeOf(value).String() {
 			return "", errors.New("Types in array are inconsistent")
@@ -66,17 +72,29 @@ func returnJsonString(keyword, operator string, value interface{}) (string, erro
 
 	switch v := value.(type) {
 	case int:
-		return "{" + "\"" + keyword + ":" + "{\"" + operator + "\":" + strconv.Itoa(v) + "}}", nil
+		return "{" + "\"" + keyword + ":" + "{\"" + operator + "\":" + intToString(v) + "}}", nil
 	case float64:
-		return "{" + "\"" + keyword + ":" + "{\"" + operator + "\":" + strconv.FormatFloat(v, 'f', 8, 64) + "}}", nil
+		return "{" + "\"" + keyword + ":" + "{\"" + operator + "\":" + floatToString(v) + "}}", nil
 	case string:
 		return "{" + "\"" + keyword + ":" + "{\"" + operator + "\":" + v + "\"}}", nil
 	case []string:
-		return "{" + "\"" + keyword + ":" + "{\"" + operator + "\":" + returnArrayString(v, true) + "\"}}", nil
+		unboxedValue, err := returnArrayString(value)
+		if err != nil {
+			return "", err
+		}
+		return "{" + "\"" + keyword + ":" + "{\"" + operator + "\":" + unboxedValue + "\"}}", nil
 	case []int:
-		return "{" + "\"" + keyword + ":" + "{\"" + operator + "\":" + returnArrayString(v, false) + "\"}}", nil
+		unboxedValue, err := returnArrayString(value)
+		if err != nil {
+			return "", err
+		}
+		return "{" + "\"" + keyword + ":" + "{\"" + operator + "\":" + unboxedValue + "\"}}", nil
 	case []float64:
-		return "{" + "\"" + keyword + ":" + "{\"" + operator + "\":" + returnArrayString(v, false) + "\"}}", nil
+		unboxedValue, err := returnArrayString(value)
+		if err != nil {
+			return "", err
+		}
+		return "{" + "\"" + keyword + ":" + "{\"" + operator + "\":" + unboxedValue + "\"}}", nil
 	default:
 		return "", errors.New("Error: Accepts only Text or Numeric Types")
 
@@ -94,48 +112,169 @@ func Blank(keyword string, b bool) string {
 
 func BeginsWith(keyword string, value string) (string, error) {
 	jsonString, err := returnJsonString(keyword, "bw", value)
-	if err {
-		return nil, err
+	if err != nil {
+		return "", err
 	}
 	return jsonString, nil
 }
 
-func BeginsWithAny(keyword string, values ...string) string {
+func BeginsWithAny(keyword string, values ...string) (string, error) {
 
-	return "{" + "\"" + keyword + ":" + "{\"$bwin\":" + returnArrayString(values) + "}}"
+	jsonString, err := returnJsonString(keyword, "$bwin", values)
+	if err != nil {
+		return "", err
+	}
+	return jsonString, nil
 
 }
 
 func EqualTo(keyword string, value interface{}) (string, error) {
-
-	switch v := value.(type) {
-	case int:
-		return "{" + "\"" + keyword + ":" + "{\"$eq\":" + strconv.Itoa(v) + "}}", nil
-	case float64:
-		return "{" + "\"" + keyword + ":" + "{\"$eq\":" + strconv.FormatFloat(v, 'f', 8, 64) + "}}", nil
-	case string:
-		return "{" + "\"" + keyword + ":" + "{\"$eq\":\"" + v + "\"}}", nil
-	default:
-		return "", errors.New("Error: Accepts only Text or Numeric Types")
-
+	jsonString, err := returnJsonString(keyword, "$eq", value)
+	if err != nil {
+		return "", err
 	}
+	return jsonString, nil
 
 }
 
-func Excludes(keyword string, values interface{}) string {
+func Excludes(keyword string, values interface{}) (string, error) {
 
-	switch v := value.(type) {
-	case int:
-		return "{" + "\"" + keyword + ":" + "{\"$excludes\":" + strconv.Itoa(v) + "}}", nil
-	case float64:
-		return "{" + "\"" + keyword + ":" + "{\"$excludes\":" + strconv.FormatFloat(v, 'f', 8, 64) + "}}", nil
-	case string:
-		return "{" + "\"" + keyword + ":" + "{\"$eq\":\"" + v + "\"}}", nil
-	default:
-		return "", errors.New("Error: Accepts only Text or Numeric Types")
-
+	jsonString, err := returnJsonString(keyword, "$excludes", values)
+	if err != nil {
+		return "", err
 	}
+	return jsonString, nil
 
-	return "{" + "\"" + keyword + ":" + "{\"$bwin\":" + returnArrayString(values) + "}}"
+}
+
+func ExcludesAny(keyword string, values interface{}) (string, error) {
+
+	jsonString, err := returnJsonString(keyword, "$excludes_any", values)
+	if err != nil {
+		return "", err
+	}
+	return jsonString, nil
+
+}
+
+func GreaterThan(keyword string, values interface{}) (string, error) {
+
+	jsonString, err := returnJsonString(keyword, "$gt", values)
+	if err != nil {
+		return "", err
+	}
+	return jsonString, nil
+
+}
+
+func GreaterThanEqual(keyword string, values interface{}) (string, error) {
+
+	jsonString, err := returnJsonString(keyword, "$gte", values)
+	if err != nil {
+		return "", err
+	}
+	return jsonString, nil
+
+}
+
+func EqualsAnyOf(keyword string, values interface{}) (string, error) {
+
+	jsonString, err := returnJsonString(keyword, "$in", values)
+	if err != nil {
+		return "", err
+	}
+	return jsonString, nil
+
+}
+
+func Includes(keyword string, values interface{}) (string, error) {
+
+	jsonString, err := returnJsonString(keyword, "$includes", values)
+	if err != nil {
+		return "", err
+	}
+	return jsonString, nil
+
+}
+
+func IncludesAny(keyword string, values interface{}) (string, error) {
+
+	jsonString, err := returnJsonString(keyword, "$includes", values)
+	if err != nil {
+		return "", err
+	}
+	return jsonString, nil
+
+}
+
+func LessThan(keyword string, values interface{}) (string, error) {
+
+	valueType := reflect.TypeOf(values).String()
+
+	jsonString, err := returnJsonString(keyword, "$lt", values)
+	if err != nil {
+		return "", err
+	}
+	return jsonString, nil
+
+}
+
+func LessThanEqual(keyword string, values interface{}) (string, error) {
+
+	jsonString, err := returnJsonString(keyword, "$lte", values)
+	if err != nil {
+		return "", err
+	}
+	return jsonString, nil
+
+}
+
+func NotBeginWith(keyword string, values interface{}) (string, error) {
+
+	jsonString, err := returnJsonString(keyword, "$nbw", values)
+	if err != nil {
+		return "", err
+	}
+	return jsonString, nil
+
+}
+
+func NotBeginWithAny(keyword string, values interface{}) (string, error) {
+
+	jsonString, err := returnJsonString(keyword, "$nbwin", values)
+	if err != nil {
+		return "", err
+	}
+	return jsonString, nil
+
+}
+
+func NotEqualTo(keyword string, values interface{}) (string, error) {
+
+	jsonString, err := returnJsonString(keyword, "$nbwin", values)
+	if err != nil {
+		return "", err
+	}
+	return jsonString, nil
+
+}
+
+func NotEqualAnyOf(keyword string, values interface{}) (string, error) {
+
+	jsonString, err := returnJsonString(keyword, "$nbwin", values)
+	if err != nil {
+		return "", err
+	}
+	return jsonString, nil
+
+}
+
+func Search(keyword string, values interface{}) (string, error) {
+
+	jsonString, err := returnJsonString(keyword, "$search", values)
+	if err != nil {
+		return "", err
+	}
+	return jsonString, nil
 
 }
