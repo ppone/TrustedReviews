@@ -4,7 +4,23 @@ import (
 	"testing"
 )
 
+type testStruct struct {
+	x int
+	y int
+}
+
+var testFailStruct testStruct = testStruct{}
+
+func TestTruncateLastZeroInFloatString(t *testing.T) {
+
+}
+
+func TestInferfaceSlice(t *testing.T) {
+	//fmt.Println(NewInterfaceSlice(4, 2, "hello", true))
+}
+
 func TestCheckTypes(t *testing.T) {
+
 	jsonType, err := checkTypes(23.4, numericT)
 	assertNoError(err, t)
 	if err == nil {
@@ -35,29 +51,45 @@ func TestCheckTypes(t *testing.T) {
 }
 
 func TestCheckTypesInArray(t *testing.T) {
-	a :=  []interface{4.5,45.2}
-	jsonType, err := checkTypesInArray(a, numericT)
+	//a := []float64{4.5, 45.2}
+	//z, _ := covertSliceToInterfaceSlice(a)
+	s := NewInterfaceSlice(4.5, 45.44)
+	jsonType, err := checkTypesInArray(s, numericT)
 	assertNoError(err, t)
 	if err == nil {
 		assertEqual("float64", jsonType, t, "jsonType is incorrect")
 	}
-	jsonType, err = checkTypes("23.4", stringT)
-	assertNoError(err, t)
-	if err == nil {
-		assertEqual("string", jsonType, t, "jsonType is incorrect")
-	}
-	jsonType, err = checkTypes(23, stringAndNumericT)
+
+	s = NewInterfaceSlice(4, 45)
+	jsonType, err = checkTypesInArray(s, numericT)
 	assertNoError(err, t)
 	if err == nil {
 		assertEqual("int", jsonType, t, "jsonType is incorrect")
 	}
-	jsonType, err = checkTypes("23.4", numericT)
-	assertError(err, t)
-	jsonType, err = checkTypes(23.4, stringT)
+
+	s = NewInterfaceSlice("hello", "goodbye", "seeya")
+	jsonType, err = checkTypesInArray(s, stringT)
+	assertNoError(err, t)
+	if err == nil {
+		assertEqual("string", jsonType, t, "jsonType is incorrect")
+	}
+
+	s = NewInterfaceSlice("hello", "goodbye", "seeya")
+	jsonType, err = checkTypesInArray(s, numericT)
 	assertError(err, t)
 
-	jsonType, err = checkTypes(true, stringAndNumericT)
-	assertError(err, t)
+	s = NewInterfaceSlice("hello", "goodbye", "seeya")
+	jsonType, err = checkTypesInArray(s, stringAndNumericT)
+	assertNoError(err, t)
+
+	s = NewInterfaceSlice(4.5, 7.5)
+	jsonType, err = checkTypesInArray(s, stringAndNumericT)
+	assertNoError(err, t)
+
+	s = NewInterfaceSlice(4, 7)
+	jsonType, err = checkTypesInArray(s, stringAndNumericT)
+	assertNoError(err, t)
+
 }
 
 func TestFloatToString(t *testing.T) {
@@ -124,6 +156,11 @@ func TestEqualsTo(t *testing.T) {
 		assertEqual("{\"price\":{\"$eq\":101.77}}", beginsWithOutput, t, "Error in testing EqualsTo")
 	}
 
+	beginsWithOutput, err = EqualTo("price", true)
+	assertError(err, t)
+	beginsWithOutput, err = EqualTo("price", testFailStruct)
+	assertError(err, t)
+
 }
 
 func TestExcludes(t *testing.T) {
@@ -145,6 +182,11 @@ func TestExcludes(t *testing.T) {
 		assertEqual("{\"price\":{\"$excludes\":101.77}}", beginsWithOutput, t, "Error in testing EqualsTo")
 	}
 
+	beginsWithOutput, err = EqualTo("price", true)
+	assertError(err, t)
+	beginsWithOutput, err = EqualTo("price", testFailStruct)
+	assertError(err, t)
+
 }
 
 func TestExcludesAny(t *testing.T) {
@@ -165,6 +207,33 @@ func TestExcludesAny(t *testing.T) {
 	if err == nil {
 		assertEqual("{\"price\":{\"$excludes_any\":[101.77,77.67,99.01,67.64]}}", beginsWithOutput, t, "Error in testing EqualsTo")
 	}
+
+	beginsWithOutput, err = EqualTo("region", true)
+	assertError(err, t)
+	beginsWithOutput, err = EqualTo("region", testFailStruct)
+	assertError(err, t)
+
+}
+
+func TestGreaterThan(t *testing.T) {
+	beginsWithOutput, err := GreaterThan("rating", 7.5)
+
+	assertEqual(nil, err, t, "function error was thrown")
+	if err == nil {
+		assertEqual("{\"rating\":{\"$gt\":7.5}}", beginsWithOutput, t, "Error in testing EqualsTo")
+	}
+
+	beginsWithOutput, err = GreaterThan("rating", 9)
+
+	assertEqual(nil, err, t, "function error was thrown")
+	if err == nil {
+		assertEqual("{\"rating\":{\"$gt\":9}}", beginsWithOutput, t, "Error in testing EqualsTo")
+	}
+
+	beginsWithOutput, err = GreaterThan("region", "7.5")
+	assertError(err, t)
+	beginsWithOutput, err = EqualTo("region", testFailStruct)
+	assertError(err, t)
 
 }
 
