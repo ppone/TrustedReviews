@@ -27,12 +27,42 @@ const (
 	stringAndNumericT        // = iota
 )
 
+func truncateLastZeroInFloatString(s string) string {
+	splitedString := strings.Split(s, ".")
+
+	if len(splitedString) == 2 && len(splitedString[1]) == 2 && string(splitedString[1][1]) == "0" {
+		return splitedString[0] + "." + string(splitedString[1][0])
+	}
+
+	return s
+}
+
 func floatToString(f float64) string {
 	return strconv.FormatFloat(f, 'f', floatPrecision, floatBits)
 }
 
 func intToString(i int) string {
 	return strconv.Itoa(i)
+}
+
+func covertSliceToInterfaceSlice(t interface{}) ([]interface{}, error) {
+	switch reflect.TypeOf(t).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(t)
+		rl := make([]interface{}, s.Len())
+
+		for i := 0; i < s.Len(); i++ {
+			rl[i] = s.Index(i).Interface()
+		}
+
+		return rl, nil
+	}
+
+	return nil, errors.New("Input to function needs to be a slice")
+}
+
+func NewInterfaceSlice(n ...interface{}) []interface{} {
+	return n
 }
 
 func returnJsonArray(valueBox interface{}) (string, error) {
@@ -235,6 +265,12 @@ func BeginsWithAny(keyword string, values ...string) (string, error) {
 }
 
 func EqualTo(keyword string, value interface{}) (string, error) {
+	_, errA := checkTypes(value, stringAndNumericT)
+
+	if errA != nil {
+		return "", errA
+	}
+
 	jsonString, err := returnJsonString(keyword, "$eq", value)
 	if err != nil {
 		return "", err
@@ -243,8 +279,14 @@ func EqualTo(keyword string, value interface{}) (string, error) {
 
 }
 
-func Excludes(keyword string, values interface{}) (string, error) {
-	jsonString, err := returnJsonString(keyword, "$excludes", values)
+func Excludes(keyword string, value interface{}) (string, error) {
+	_, errA := checkTypes(value, stringAndNumericT)
+
+	if errA != nil {
+		return "", errA
+	}
+
+	jsonString, err := returnJsonString(keyword, "$excludes", value)
 	if err != nil {
 		return "", err
 	}
@@ -253,6 +295,12 @@ func Excludes(keyword string, values interface{}) (string, error) {
 }
 
 func ExcludesAny(keyword string, values ...interface{}) (string, error) {
+	_, errA := checkTypesInArray(values, stringAndNumericT)
+
+	if errA != nil {
+		return "", errA
+	}
+
 	jsonString, err := returnJsonString(keyword, "$excludes_any", values)
 	if err != nil {
 		return "", err
@@ -261,16 +309,15 @@ func ExcludesAny(keyword string, values ...interface{}) (string, error) {
 
 }
 
-func GreaterThan(keyword string, values interface{}) (string, error) {
-	jsonType, err := checkTypes(values, numericT)
-	if err != nil {
-		return "", err
-	}
-	if jsonType == "string" {
-		return "", errors.New("Can only accept numeric types")
+func GreaterThan(keyword string, value interface{}) (string, error) {
+
+	_, errA := checkTypes(value, numericT)
+
+	if errA != nil {
+		return "", errA
 	}
 
-	jsonString, err := returnJsonString(keyword, "$gt", values)
+	jsonString, err := returnJsonString(keyword, "$gt", value)
 	if err != nil {
 		return "", err
 	}
@@ -278,8 +325,15 @@ func GreaterThan(keyword string, values interface{}) (string, error) {
 
 }
 
-func GreaterThanEqual(keyword string, values interface{}) (string, error) {
-	jsonString, err := returnJsonString(keyword, "$gte", values)
+func GreaterThanEqual(keyword string, value interface{}) (string, error) {
+
+	_, errA := checkTypes(value, numericT)
+
+	if errA != nil {
+		return "", errA
+	}
+
+	jsonString, err := returnJsonString(keyword, "$gte", value)
 	if err != nil {
 		return "", err
 	}
@@ -288,6 +342,12 @@ func GreaterThanEqual(keyword string, values interface{}) (string, error) {
 }
 
 func EqualsAnyOf(keyword string, values interface{}) (string, error) {
+	_, errA := checkTypes(values, numericT)
+
+	if errA != nil {
+		return "", errA
+	}
+
 	jsonString, err := returnJsonString(keyword, "$in", values)
 	if err != nil {
 		return "", err
@@ -297,6 +357,12 @@ func EqualsAnyOf(keyword string, values interface{}) (string, error) {
 }
 
 func Includes(keyword string, values interface{}) (string, error) {
+	_, errA := checkTypes(values, stringAndNumericT)
+
+	if errA != nil {
+		return "", errA
+	}
+
 	jsonString, err := returnJsonString(keyword, "$includes", values)
 	if err != nil {
 		return "", err
@@ -305,7 +371,12 @@ func Includes(keyword string, values interface{}) (string, error) {
 
 }
 
-func IncludesAny(keyword string, values interface{}) (string, error) {
+func IncludesAny(keyword string, values ...interface{}) (string, error) {
+	_, errA := checkTypesInArray(values, stringAndNumericT)
+
+	if errA != nil {
+		return "", errA
+	}
 	jsonString, err := returnJsonString(keyword, "$includes", values)
 	if err != nil {
 		return "", err
@@ -314,8 +385,14 @@ func IncludesAny(keyword string, values interface{}) (string, error) {
 
 }
 
-func LessThan(keyword string, values interface{}) (string, error) {
-	jsonString, err := returnJsonString(keyword, "$lt", values)
+func LessThan(keyword string, value interface{}) (string, error) {
+	_, errA := checkTypes(value, numericT)
+
+	if errA != nil {
+		return "", errA
+	}
+
+	jsonString, err := returnJsonString(keyword, "$lt", value)
 	if err != nil {
 		return "", err
 	}
@@ -324,6 +401,11 @@ func LessThan(keyword string, values interface{}) (string, error) {
 }
 
 func LessThanEqual(keyword string, values interface{}) (string, error) {
+	_, errA := checkTypes(values, numericT)
+
+	if errA != nil {
+		return "", errA
+	}
 	jsonString, err := returnJsonString(keyword, "$lte", values)
 	if err != nil {
 		return "", err
@@ -332,9 +414,15 @@ func LessThanEqual(keyword string, values interface{}) (string, error) {
 
 }
 
-func NotBeginWith(keyword string, values interface{}) (string, error) {
+func NotBeginWith(keyword string, value interface{}) (string, error) {
 
-	jsonString, err := returnJsonString(keyword, "$nbw", values)
+	_, errA := checkTypes(value, stringT)
+
+	if errA != nil {
+		return "", errA
+	}
+
+	jsonString, err := returnJsonString(keyword, "$nbw", value)
 	if err != nil {
 		return "", err
 	}
@@ -342,7 +430,13 @@ func NotBeginWith(keyword string, values interface{}) (string, error) {
 
 }
 
-func NotBeginWithAny(keyword string, values interface{}) (string, error) {
+func NotBeginWithAny(keyword string, values ...interface{}) (string, error) {
+
+	_, errA := checkTypesInArray(values, stringT)
+
+	if errA != nil {
+		return "", errA
+	}
 
 	jsonString, err := returnJsonString(keyword, "$nbwin", values)
 	if err != nil {
@@ -352,9 +446,15 @@ func NotBeginWithAny(keyword string, values interface{}) (string, error) {
 
 }
 
-func NotEqualTo(keyword string, values interface{}) (string, error) {
+func NotEqualTo(keyword string, value interface{}) (string, error) {
 
-	jsonString, err := returnJsonString(keyword, "$nbwin", values)
+	_, errA := checkTypes(value, stringAndNumericT)
+
+	if errA != nil {
+		return "", errA
+	}
+
+	jsonString, err := returnJsonString(keyword, "$neq", value)
 	if err != nil {
 		return "", err
 	}
@@ -362,9 +462,15 @@ func NotEqualTo(keyword string, values interface{}) (string, error) {
 
 }
 
-func NotEqualAnyOf(keyword string, values interface{}) (string, error) {
+func NotEqualAnyOf(keyword string, values ...interface{}) (string, error) {
 
-	jsonString, err := returnJsonString(keyword, "$nbwin", values)
+	_, errA := checkTypesInArray(values, stringAndNumericT)
+
+	if errA != nil {
+		return "", errA
+	}
+
+	jsonString, err := returnJsonString(keyword, "$nin", values)
 	if err != nil {
 		return "", err
 	}
@@ -373,6 +479,12 @@ func NotEqualAnyOf(keyword string, values interface{}) (string, error) {
 }
 
 func Search(keyword string, values interface{}) (string, error) {
+
+	_, errA := checkTypes(values, stringT)
+
+	if errA != nil {
+		return "", errA
+	}
 
 	jsonString, err := returnJsonString(keyword, "$search", values)
 	if err != nil {
