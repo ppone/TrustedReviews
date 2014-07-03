@@ -38,7 +38,7 @@ func truncateLastZeroInFloatString(s string) string {
 }
 
 func floatToString(f float64) string {
-	return strconv.FormatFloat(f, 'f', floatPrecision, floatBits)
+	return truncateLastZeroInFloatString(strconv.FormatFloat(f, 'f', floatPrecision, floatBits))
 }
 
 func intToString(i int) string {
@@ -341,8 +341,8 @@ func GreaterThanEqual(keyword string, value interface{}) (string, error) {
 
 }
 
-func EqualsAnyOf(keyword string, values interface{}) (string, error) {
-	_, errA := checkTypes(values, numericT)
+func EqualsAnyOf(keyword string, values ...interface{}) (string, error) {
+	_, errA := checkTypesInArray(values, stringAndNumericT)
 
 	if errA != nil {
 		return "", errA
@@ -377,7 +377,7 @@ func IncludesAny(keyword string, values ...interface{}) (string, error) {
 	if errA != nil {
 		return "", errA
 	}
-	jsonString, err := returnJsonString(keyword, "$includes", values)
+	jsonString, err := returnJsonString(keyword, "$includes_any", values)
 	if err != nil {
 		return "", err
 	}
@@ -414,13 +414,7 @@ func LessThanEqual(keyword string, values interface{}) (string, error) {
 
 }
 
-func NotBeginWith(keyword string, value interface{}) (string, error) {
-
-	_, errA := checkTypes(value, stringT)
-
-	if errA != nil {
-		return "", errA
-	}
+func NotBeginWith(keyword string, value string) (string, error) {
 
 	jsonString, err := returnJsonString(keyword, "$nbw", value)
 	if err != nil {
@@ -430,13 +424,7 @@ func NotBeginWith(keyword string, value interface{}) (string, error) {
 
 }
 
-func NotBeginWithAny(keyword string, values ...interface{}) (string, error) {
-
-	_, errA := checkTypesInArray(values, stringT)
-
-	if errA != nil {
-		return "", errA
-	}
+func NotBeginWithAny(keyword string, values ...string) (string, error) {
 
 	jsonString, err := returnJsonString(keyword, "$nbwin", values)
 	if err != nil {
@@ -478,15 +466,9 @@ func NotEqualAnyOf(keyword string, values ...interface{}) (string, error) {
 
 }
 
-func Search(keyword string, values interface{}) (string, error) {
+func Search(keyword string, value string) (string, error) {
 
-	_, errA := checkTypes(values, stringT)
-
-	if errA != nil {
-		return "", errA
-	}
-
-	jsonString, err := returnJsonString(keyword, "$search", values)
+	jsonString, err := returnJsonString(keyword, "$search", value)
 	if err != nil {
 		return "", err
 	}
