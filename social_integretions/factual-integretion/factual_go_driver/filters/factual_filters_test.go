@@ -146,8 +146,8 @@ func TestIntToString(t *testing.T) {
 }
 
 func TestBlank(t *testing.T) {
-	assertEqual("{\"city\":{\"$blank\":true}}", Blank("city", true), t, "Error in testing Blank")
-	assertEqual("{\"city\":{\"$blank\":false}}", Blank("city", false), t, "Error in testing Blank")
+	assertEqual("filters={\"city\":{\"$blank\":true}}", Blank("city", true), t, "Error in testing Blank")
+	assertEqual("filters={\"city\":{\"$blank\":false}}", Blank("city", false), t, "Error in testing Blank")
 
 }
 
@@ -155,7 +155,7 @@ func TestBeginsWith(t *testing.T) {
 	beginsWithOutput, err := BeginsWith("city", "low")
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"city\":{\"$bw\":\"low\"}}", beginsWithOutput, t, "Error in testing BeginsWith")
+		assertEqual("filters={\"city\":{\"$bw\":\"low\"}}", beginsWithOutput, t, "Error in testing BeginsWith")
 	}
 
 }
@@ -163,7 +163,7 @@ func TestBeginsWithAny(t *testing.T) {
 	beginsWithOutput, err := BeginsWithAny("state", "mass", "cali", "flor")
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"state\":{\"$bwin\":[\"mass\",\"cali\",\"flor\"]}}", beginsWithOutput, t, "Error in testing BeginsWith")
+		assertEqual("filters={\"state\":{\"$bwin\":[\"mass\",\"cali\",\"flor\"]}}", beginsWithOutput, t, "Error in testing BeginsWith")
 	}
 
 }
@@ -172,19 +172,19 @@ func TestEqualsTo(t *testing.T) {
 	beginsWithOutput, err := EqualTo("region", "CA")
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"region\":{\"$eq\":\"CA\"}}", beginsWithOutput, t, "Error in testing EqualsTo")
+		assertEqual("filters={\"region\":{\"$eq\":\"CA\"}}", beginsWithOutput, t, "Error in testing EqualsTo")
 	}
 
 	beginsWithOutput, err = EqualTo("category_id", 232)
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"category_id\":{\"$eq\":232}}", beginsWithOutput, t, "Error in testing EqualsTo")
+		assertEqual("filters={\"category_id\":{\"$eq\":232}}", beginsWithOutput, t, "Error in testing EqualsTo")
 	}
 
 	beginsWithOutput, err = EqualTo("price", 101.77)
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"price\":{\"$eq\":101.77}}", beginsWithOutput, t, "Error in testing EqualsTo")
+		assertEqual("filters={\"price\":{\"$eq\":101.77}}", beginsWithOutput, t, "Error in testing EqualsTo")
 	}
 
 	beginsWithOutput, err = EqualTo("price", true)
@@ -198,19 +198,19 @@ func TestExcludes(t *testing.T) {
 	beginsWithOutput, err := Excludes("region", "CA")
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"region\":{\"$excludes\":\"CA\"}}", beginsWithOutput, t, "Error in testing Excludes")
+		assertEqual("filters={\"region\":{\"$excludes\":\"CA\"}}", beginsWithOutput, t, "Error in testing Excludes")
 	}
 
 	beginsWithOutput, err = Excludes("category_id", 232)
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"category_id\":{\"$excludes\":232}}", beginsWithOutput, t, "Error in testing Excludes")
+		assertEqual("filters={\"category_id\":{\"$excludes\":232}}", beginsWithOutput, t, "Error in testing Excludes")
 	}
 
 	beginsWithOutput, err = Excludes("price", 101.77)
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"price\":{\"$excludes\":101.77}}", beginsWithOutput, t, "Error in testing Excludes")
+		assertEqual("filters={\"price\":{\"$excludes\":101.77}}", beginsWithOutput, t, "Error in testing Excludes")
 	}
 
 	beginsWithOutput, err = Excludes("price", true)
@@ -224,19 +224,19 @@ func TestExcludesAny(t *testing.T) {
 	beginsWithOutput, err := ExcludesAny("region", "CA", "VA", "MA")
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"region\":{\"$excludes_any\":[\"CA\",\"VA\",\"MA\"]}}", beginsWithOutput, t, "Error in testing ExcludesAny")
+		assertEqual("filters={\"region\":{\"$excludes_any\":[\"CA\",\"VA\",\"MA\"]}}", beginsWithOutput, t, "Error in testing ExcludesAny")
 	}
 
 	beginsWithOutput, err = ExcludesAny("category_id", 232, 342, 232, 20284)
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"category_id\":{\"$excludes_any\":[232,342,232,20284]}}", beginsWithOutput, t, "Error in testing ExcludesAny")
+		assertEqual("filters={\"category_id\":{\"$excludes_any\":[232,342,232,20284]}}", beginsWithOutput, t, "Error in testing ExcludesAny")
 	}
 
 	beginsWithOutput, err = ExcludesAny("price", 101.77, 77.67, 99.009, 67.644)
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"price\":{\"$excludes_any\":[101.77,77.67,99.01,67.64]}}", beginsWithOutput, t, "Error in testing ExcludesAny")
+		assertEqual("filters={\"price\":{\"$excludes_any\":[101.77,77.67,99.01,67.64]}}", beginsWithOutput, t, "Error in testing ExcludesAny")
 	}
 
 	beginsWithOutput, err = ExcludesAny("region", true)
@@ -251,21 +251,21 @@ func TestGreaterThan(t *testing.T) {
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$gt\":7.5}}", beginsWithOutput, t, "Error in testing GreaterThan")
+		assertEqual("filters={\"rating\":{\"$gt\":7.5}}", beginsWithOutput, t, "Error in testing GreaterThan")
 	}
 
 	beginsWithOutput, err = GreaterThan("rating", 9)
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$gt\":9}}", beginsWithOutput, t, "Error in testing GreaterThan")
+		assertEqual("filters={\"rating\":{\"$gt\":9}}", beginsWithOutput, t, "Error in testing GreaterThan")
 	}
 
 	beginsWithOutput, err = GreaterThan("rating", 6.64)
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$gt\":6.64}}", beginsWithOutput, t, "Error in testing GreaterThan")
+		assertEqual("filters={\"rating\":{\"$gt\":6.64}}", beginsWithOutput, t, "Error in testing GreaterThan")
 	}
 
 	beginsWithOutput, err = GreaterThan("region", "6.64")
@@ -280,21 +280,21 @@ func TestGreaterThanEqual(t *testing.T) {
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$gte\":7.5}}", beginsWithOutput, t, "Error in testing GreaterThanEqual")
+		assertEqual("filters={\"rating\":{\"$gte\":7.5}}", beginsWithOutput, t, "Error in testing GreaterThanEqual")
 	}
 
 	beginsWithOutput, err = GreaterThanEqual("rating", 9)
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$gte\":9}}", beginsWithOutput, t, "Error in testing GreaterThanEqual")
+		assertEqual("filters={\"rating\":{\"$gte\":9}}", beginsWithOutput, t, "Error in testing GreaterThanEqual")
 	}
 
 	beginsWithOutput, err = GreaterThanEqual("rating", 6.64)
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$gte\":6.64}}", beginsWithOutput, t, "Error in testing GreaterThanEqual")
+		assertEqual("filters={\"rating\":{\"$gte\":6.64}}", beginsWithOutput, t, "Error in testing GreaterThanEqual")
 	}
 
 	beginsWithOutput, err = GreaterThanEqual("region", "7.5")
@@ -309,21 +309,21 @@ func TestEqualsAnyOf(t *testing.T) {
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"region\":{\"$in\":[\"MA\",\"VT\",\"NH\",\"RI\",\"CT\"]}}", beginsWithOutput, t, "Error in testing EqualsAnyOf")
+		assertEqual("filters={\"region\":{\"$in\":[\"MA\",\"VT\",\"NH\",\"RI\",\"CT\"]}}", beginsWithOutput, t, "Error in testing EqualsAnyOf")
 	}
 
 	beginsWithOutput, err = EqualsAnyOf("rating", 9.21, 4.25, 6.50, 7.29, 9.99)
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$in\":[9.21,4.25,6.5,7.29,9.99]}}", beginsWithOutput, t, "Error in testing EqualsAnyOf")
+		assertEqual("filters={\"rating\":{\"$in\":[9.21,4.25,6.5,7.29,9.99]}}", beginsWithOutput, t, "Error in testing EqualsAnyOf")
 	}
 
 	beginsWithOutput, err = EqualsAnyOf("rating", 4, 3, 100, 34, 35, 23, 66, 100)
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$in\":[4,3,100,34,35,23,66,100]}}", beginsWithOutput, t, "Error in testing EqualsAnyOf")
+		assertEqual("filters={\"rating\":{\"$in\":[4,3,100,34,35,23,66,100]}}", beginsWithOutput, t, "Error in testing EqualsAnyOf")
 	}
 
 	beginsWithOutput, err = EqualsAnyOf("region", "7.5", 7.8)
@@ -346,21 +346,21 @@ func TestIncludes(t *testing.T) {
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"region\":{\"$includes\":\"MA\"}}", beginsWithOutput, t, "Error in testing Includes")
+		assertEqual("filters={\"region\":{\"$includes\":\"MA\"}}", beginsWithOutput, t, "Error in testing Includes")
 	}
 
 	beginsWithOutput, err = Includes("rating", 9.21)
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$includes\":9.21}}", beginsWithOutput, t, "Error in testing Includes")
+		assertEqual("filters={\"rating\":{\"$includes\":9.21}}", beginsWithOutput, t, "Error in testing Includes")
 	}
 
 	beginsWithOutput, err = Includes("rating", 7)
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$includes\":7}}", beginsWithOutput, t, "Error in testing Includes")
+		assertEqual("filters={\"rating\":{\"$includes\":7}}", beginsWithOutput, t, "Error in testing Includes")
 	}
 
 	beginsWithOutput, err = Includes("rating", testFailStruct)
@@ -375,21 +375,21 @@ func TestIncludesAny(t *testing.T) {
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"region\":{\"$includes_any\":[\"MA\",\"VT\",\"NH\",\"RI\",\"CT\"]}}", beginsWithOutput, t, "Error in testing IncludesAny")
+		assertEqual("filters={\"region\":{\"$includes_any\":[\"MA\",\"VT\",\"NH\",\"RI\",\"CT\"]}}", beginsWithOutput, t, "Error in testing IncludesAny")
 	}
 
 	beginsWithOutput, err = IncludesAny("rating", 9.21, 4.25, 6.50, 7.29, 9.99)
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$includes_any\":[9.21,4.25,6.5,7.29,9.99]}}", beginsWithOutput, t, "Error in testing IncludesAny")
+		assertEqual("filters={\"rating\":{\"$includes_any\":[9.21,4.25,6.5,7.29,9.99]}}", beginsWithOutput, t, "Error in testing IncludesAny")
 	}
 
 	beginsWithOutput, err = IncludesAny("category_id", 10, 100)
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"category_id\":{\"$includes_any\":[10,100]}}", beginsWithOutput, t, "Error in testing IncludesAny")
+		assertEqual("filters={\"category_id\":{\"$includes_any\":[10,100]}}", beginsWithOutput, t, "Error in testing IncludesAny")
 	}
 
 	beginsWithOutput, err = IncludesAny("region", "7.5", 7.8)
@@ -412,21 +412,21 @@ func TestLessThan(t *testing.T) {
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$lt\":7.5}}", beginsWithOutput, t, "Error in testing LessThan")
+		assertEqual("filters={\"rating\":{\"$lt\":7.5}}", beginsWithOutput, t, "Error in testing LessThan")
 	}
 
 	beginsWithOutput, err = LessThan("rating", 9)
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$lt\":9}}", beginsWithOutput, t, "Error in testing LessThan")
+		assertEqual("filters={\"rating\":{\"$lt\":9}}", beginsWithOutput, t, "Error in testing LessThan")
 	}
 
 	beginsWithOutput, err = LessThan("rating", 6.64)
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$lt\":6.64}}", beginsWithOutput, t, "Error in testing LessThan")
+		assertEqual("filters={\"rating\":{\"$lt\":6.64}}", beginsWithOutput, t, "Error in testing LessThan")
 	}
 
 	beginsWithOutput, err = LessThan("region", "6.64")
@@ -441,21 +441,21 @@ func TestLessThanEqual(t *testing.T) {
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$lte\":7.5}}", beginsWithOutput, t, "Error in testing LessThanEqual")
+		assertEqual("filters={\"rating\":{\"$lte\":7.5}}", beginsWithOutput, t, "Error in testing LessThanEqual")
 	}
 
 	beginsWithOutput, err = LessThanEqual("rating", 9)
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$lte\":9}}", beginsWithOutput, t, "Error in testing LessThanEqual")
+		assertEqual("filters={\"rating\":{\"$lte\":9}}", beginsWithOutput, t, "Error in testing LessThanEqual")
 	}
 
 	beginsWithOutput, err = LessThanEqual("rating", 6.64)
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$lte\":6.64}}", beginsWithOutput, t, "Error in testing LessThanEqual")
+		assertEqual("filters={\"rating\":{\"$lte\":6.64}}", beginsWithOutput, t, "Error in testing LessThanEqual")
 	}
 
 	beginsWithOutput, err = LessThanEqual("region", "6.64")
@@ -469,7 +469,7 @@ func TestNotBeginsWith(t *testing.T) {
 	beginsWithOutput, err := NotBeginWith("city", "low")
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"city\":{\"$nbw\":\"low\"}}", beginsWithOutput, t, "Error in testing NotBeginsWith")
+		assertEqual("filters={\"city\":{\"$nbw\":\"low\"}}", beginsWithOutput, t, "Error in testing NotBeginsWith")
 	}
 
 }
@@ -477,7 +477,7 @@ func TestNotBeginsWithAny(t *testing.T) {
 	beginsWithOutput, err := NotBeginWithAny("state", "mass", "cali", "flor")
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"state\":{\"$nbwin\":[\"mass\",\"cali\",\"flor\"]}}", beginsWithOutput, t, "Error in testing NotBeginsWithAny")
+		assertEqual("filters={\"state\":{\"$nbwin\":[\"mass\",\"cali\",\"flor\"]}}", beginsWithOutput, t, "Error in testing NotBeginsWithAny")
 	}
 
 }
@@ -486,19 +486,19 @@ func TestNotEqualsTo(t *testing.T) {
 	beginsWithOutput, err := NotEqualTo("region", "CA")
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"region\":{\"$neq\":\"CA\"}}", beginsWithOutput, t, "Error in testing NotEqualsTo")
+		assertEqual("filters={\"region\":{\"$neq\":\"CA\"}}", beginsWithOutput, t, "Error in testing NotEqualsTo")
 	}
 
 	beginsWithOutput, err = NotEqualTo("category_id", 232)
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"category_id\":{\"$neq\":232}}", beginsWithOutput, t, "Error in testing NotEqualsTo")
+		assertEqual("filters={\"category_id\":{\"$neq\":232}}", beginsWithOutput, t, "Error in testing NotEqualsTo")
 	}
 
 	beginsWithOutput, err = NotEqualTo("price", 101.77)
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"price\":{\"$neq\":101.77}}", beginsWithOutput, t, "Error in testing NotEqualsTo")
+		assertEqual("filters={\"price\":{\"$neq\":101.77}}", beginsWithOutput, t, "Error in testing NotEqualsTo")
 	}
 
 	beginsWithOutput, err = NotEqualTo("price", true)
@@ -513,21 +513,21 @@ func TestNotEqualAnyOf(t *testing.T) {
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"locality\":{\"$nin\":[\"Los Angeles\",\"Santa Monica\"]}}", beginsWithOutput, t, "Error in testing NotEqualAnyOf")
+		assertEqual("filters={\"locality\":{\"$nin\":[\"Los Angeles\",\"Santa Monica\"]}}", beginsWithOutput, t, "Error in testing NotEqualAnyOf")
 	}
 
 	beginsWithOutput, err = NotEqualAnyOf("rating", 9.21, 4.25, 6.50, 7.29, 9.99)
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"rating\":{\"$nin\":[9.21,4.25,6.5,7.29,9.99]}}", beginsWithOutput, t, "Error in testing NotEqualAnyOf")
+		assertEqual("filters={\"rating\":{\"$nin\":[9.21,4.25,6.5,7.29,9.99]}}", beginsWithOutput, t, "Error in testing NotEqualAnyOf")
 	}
 
 	beginsWithOutput, err = NotEqualAnyOf("category_id", 10, 100)
 
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"category_id\":{\"$nin\":[10,100]}}", beginsWithOutput, t, "Error in testing NotEqualAnyOf")
+		assertEqual("filters={\"category_id\":{\"$nin\":[10,100]}}", beginsWithOutput, t, "Error in testing NotEqualAnyOf")
 	}
 
 	beginsWithOutput, err = NotEqualAnyOf("region", "7.5", 7.8)
@@ -549,7 +549,7 @@ func TestSearch(t *testing.T) {
 	beginsWithOutput, err := Search("name", "Charles")
 	assertEqual(nil, err, t, "function error was thrown")
 	if err == nil {
-		assertEqual("{\"name\":{\"$search\":\"Charles\"}}", beginsWithOutput, t, "Error in testing Search")
+		assertEqual("filters={\"name\":{\"$search\":\"Charles\"}}", beginsWithOutput, t, "Error in testing Search")
 	}
 
 }
