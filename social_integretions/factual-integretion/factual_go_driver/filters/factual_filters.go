@@ -197,14 +197,15 @@ func checkTypesInArray(values []interface{}, acceptedTypes jsType) (string, erro
 }
 
 func returnJsonString(keyword, operator string, value interface{}) (string, error) {
+	filterString := "filters="
 
 	switch v := value.(type) {
 	case int:
-		return "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + intToString(v) + "}}", nil
+		return filterString + "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + intToString(v) + "}}", nil
 	case float64:
-		return "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + floatToString(v) + "}}", nil
+		return filterString + "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + floatToString(v) + "}}", nil
 	case string:
-		return "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":\"" + v + "\"}}", nil
+		return filterString + "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":\"" + v + "\"}}", nil
 	case []string:
 
 		unboxedValue, err := returnJsonArray(value)
@@ -212,7 +213,7 @@ func returnJsonString(keyword, operator string, value interface{}) (string, erro
 		if err != nil {
 			return "", err
 		}
-		return "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + unboxedValue + "}}", nil
+		return filterString + "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + unboxedValue + "}}", nil
 	case []int:
 		unboxedValue, err := returnJsonArray(value)
 		if err != nil {
@@ -224,13 +225,13 @@ func returnJsonString(keyword, operator string, value interface{}) (string, erro
 		if err != nil {
 			return "", err
 		}
-		return "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + unboxedValue + "\"}}", nil
+		return filterString + "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + unboxedValue + "\"}}", nil
 	case []interface{}:
 		unboxedValue, err := returnJsonArray(value)
 		if err != nil {
 			return "", err
 		}
-		return "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + unboxedValue + "}}", nil
+		return filterString + "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + unboxedValue + "}}", nil
 
 	default:
 		return "", errors.New("Error: Accepts only Text or Numeric Types")
@@ -241,9 +242,9 @@ func returnJsonString(keyword, operator string, value interface{}) (string, erro
 
 func Blank(keyword string, b bool) string {
 	if b == true {
-		return "{\"" + keyword + "\":" + "{\"$blank\":true}}"
+		return "filters={\"" + keyword + "\":" + "{\"$blank\":true}}"
 	} else {
-		return "{\"" + keyword + "\":" + "{\"$blank\":false}}"
+		return "filters={\"" + keyword + "\":" + "{\"$blank\":false}}"
 	}
 }
 
