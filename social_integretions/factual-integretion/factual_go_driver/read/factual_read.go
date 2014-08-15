@@ -5,44 +5,266 @@ import (
 	"../geocode"
 	"../table"
 	"errors"
+	"strconv"
+	"strings"
 )
 
-type Read struct {
+type read struct {
 	query         string
 	filter        string
-	limit         int
+	limit         string
 	fact_table    table.FactTable
-	geo           geocode.GeoShape
-	include_count bool
+	geo           string
+	include_count string
 	sort          string
-	offset        int
+	selectq       string
+	offset        string
+	threshold     string
+	key           string
+	user          string
 }
 
-func NewRead(tableName string) (*Read, error) {
+type sortData struct {
+	column            string
+	sortOrderOrNumber string
+}
+
+func commaStringFromStringArray(stringArray []string) (string, error) {
+
+	commaString := ""
+
+	for _, s := range stringArray {
+		if strings.Contains(s, ",") {
+			return "", errors.New("string arguments cannot contain comma ','")
+		}
+		commaString += s + ","
+	}
+
+	return strings.TrimRight(commaString, ","), nil
+
+}
+
+func NewRead(tableName string) (*read, error) {
 	tab, err := table.NewTable(tableName)
 
 	if err != nil {
 		return nil, errors.New("Could not create new Read due to error creating a new table => ")
 	}
 
-	read := new(Read)
+	read := new(read)
 	read.fact_table = tab
 
 	return read, nil
 
 }
 
-func (R *Read) AddQuery(query string) *Read {
+func NewSort(column string, sortOrderOrNumber string) sortData {
+	return sortData{column, sortOrderOrNumber}
+}
+
+func (R *read) AddKey(key string) (*read, error) {
+
+	if key == "" {
+		return nil, errors.New("key argument is empty")
+	}
+
+	R.key = key
+
+	return R, nil
+
+}
+
+/* Future might need validate the column we sort on instead waiting for API to return error */
+
+func (R *read) AddSort(sorts ...sortData) (*read, error) {
+
+	s := ""
+
+	for _, sort := range sorts {
+
+		column := sort.column
+		sortOrderOrNumber := sort.sortOrderOrNumber
+
+		if column == "$distance" && R.geo == "" {
+			return nil, errors.New("$distance cannot be used as geo is empty")
+		}
+
+		if column == "$relevance" && R.query == "" {
+			return nil, errors.New("$relevance cannot be used as query is empty")
+		}
+
+		if sort.sortOrderOrNumber == "" {
+			s += column + ","
+			continue
+		}
+
+		if column == "distance" {
+			_, err := strconv.Atoi(sortOrderOrNumber)
+			if err != nil {
+				return nil, errors.New("must use number with distance")
+			}
+
+			s += "\"" + column + "\":" + sortOrderOrNumber + ","
+			continue
+		}
+
+		if column == "placerank" {
+			_, err := strconv.Atoi(sortOrderOrNumber)
+			if err != nil && sortOrderOrNumber != "desc" {
+				return nil, errors.New("must use number with placerank or specify order to be 'desc'")
+			}
+
+			if err == nil {
+				s += "\"" + column + "\":" + sortOrderOrNumber + ","
+			} else {
+				s += column + ":" + sortOrderOrNumber + ","
+			}
+
+			continue
+
+		}
+
+		if sortOrderOrNumber != "asc" && sortOrderOrNumber != "desc" {
+			return nil, errors.New("valid sorting values are 'asc' or 'desc' for nonvirtual columns")
+		}
+
+		s += column + ":" + sortOrderOrNumber + ","
+
+	}
+
+	s = strings.TrimRight(s, ",")
+
+	if strings.Contains(s, "\"distance\":") || strings.Contains(s, "\"placerank\":") {
+		s = "sort={" + s + "}"
+	} else {
+		s = "sort=" + s
+	}
+
+	R.sort = s
+
+	return R, nil
+
+}
+
+func (R *read) AddUser(user string) (*read, error) {
+
+	if user == "" {
+		return nil, errors.New("user argument is empty")
+	}
+
+	R.user = user
+
+	return R, nil
+
+}
+
+func (R *read) AddQuery(queries ...string) (*read, error) {
+	query, err := commaStringFromStringArray(queries)
+	if err != nil {
+		return nil, errors.New("Queries has some invalid arguments =>" + err.Error())
+	}
 	R.query = "q=" + query
+	return R, nil
+}
+
+func (R *read) AddSelect(selects ...string) (*read, error) {
+
+	s, err := commaStringFromStringArray(selects)
+	if err != nil {
+		return nil, errors.New("Select has some invalid arguments =>" + err.Error())
+	}
+	R.selectq = "select=" + s
+	return R, nil
+}
+
+func (R *read) AddIncludeCount(include_count bool) *read {
+	ic := ""
+
+	if include_count {
+		ic = "include_count=true"
+	} else {
+		ic = "include_count=false"
+	}
+
+	R.include_count = ic
 	return R
 }
 
-func (R *Read) AddFilterBlank(keyword string, b bool) *Read {
+func (R *read) AddLimit(limit int) *read {
+	R.limit = "limit=" + strconv.Itoa(limit)
+	return R
+}
+
+func (R *read) AddOffset(offset int) *read {
+	R.offset = "offset=" + strconv.Itoa(offset)
+	return R
+}
+
+func (R *read) AddThreshold(threshold string) (*read, error) {
+	t := ""
+
+	switch threshold {
+	case "confident", "default", "comprehensive":
+		t = "threshold=" + threshold
+	default:
+		return nil, errors.New("not valid threshold value, only 'confident','default', and 'comprehensive' allowed")
+
+	}
+
+	R.threshold = t
+
+	return R, nil
+
+}
+
+func (R *read) AddGeoPoint(longitude, latitude float64) (*read, error) {
+	g := geocode.NewGeoPoint(longitude, latitude)
+
+	s, err := g.ToJsonFromGeo()
+
+	if err != nil {
+		return nil, err
+	}
+
+	R.geo = s
+
+	return R, nil
+}
+
+func (R *read) AddGeoCircle(longitude, latitude float64, radius int16) (*read, error) {
+	g := geocode.NewGeoCircle(longitude, latitude, radius)
+
+	s, err := g.ToJsonFromGeo()
+
+	if err != nil {
+		return nil, err
+	}
+
+	R.geo = s
+
+	return R, nil
+}
+
+func (R *read) AddGeoRectangle(topRightLongitude, topRightLatitude, leftBottomLongitude, leftBottomLatitude float64) (*read, error) {
+	g := geocode.NewGeoRectangle(topRightLongitude, topRightLatitude, leftBottomLongitude, leftBottomLatitude)
+
+	s, err := g.ToJsonFromGeo()
+
+	if err != nil {
+		return nil, err
+	}
+
+	R.geo = s
+
+	return R, nil
+}
+
+func (R *read) AddFilterBlank(keyword string, b bool) *read {
 	f := filters.Blank(keyword, b)
 	R.filter = f
 	return R
 }
-func (R *Read) AddFilterBeginsWith(keyword string, value string) (*Read, error) {
+func (R *read) AddFilterBeginsWith(keyword string, value string) (*read, error) {
 	f, err := filters.BeginsWith(keyword, value)
 	if err != nil {
 		return nil, err
@@ -51,7 +273,7 @@ func (R *Read) AddFilterBeginsWith(keyword string, value string) (*Read, error) 
 	return R, nil
 }
 
-func (R *Read) AddFilterBeginsWithAny(keyword string, values ...string) (*Read, error) {
+func (R *read) AddFilterBeginsWithAny(keyword string, values ...string) (*read, error) {
 	f, err := filters.BeginsWithAny(keyword, values...)
 	if err != nil {
 		return nil, err
@@ -60,7 +282,7 @@ func (R *Read) AddFilterBeginsWithAny(keyword string, values ...string) (*Read, 
 	return R, nil
 }
 
-func (R *Read) AddFilterEqualTo(keyword string, value string) (*Read, error) {
+func (R *read) AddFilterEqualTo(keyword string, value string) (*read, error) {
 	f, err := filters.EqualTo(keyword, value)
 	if err != nil {
 		return nil, err
@@ -69,7 +291,7 @@ func (R *Read) AddFilterEqualTo(keyword string, value string) (*Read, error) {
 	return R, nil
 }
 
-func (R *Read) AddFilterExcludes(keyword string, value interface{}) (*Read, error) {
+func (R *read) AddFilterExcludes(keyword string, value interface{}) (*read, error) {
 	f, err := filters.Excludes(keyword, value)
 	if err != nil {
 		return nil, err
@@ -78,7 +300,7 @@ func (R *Read) AddFilterExcludes(keyword string, value interface{}) (*Read, erro
 	return R, nil
 }
 
-func (R *Read) AddFilterExcludesAny(keyword string, values ...interface{}) (*Read, error) {
+func (R *read) AddFilterExcludesAny(keyword string, values ...interface{}) (*read, error) {
 	f, err := filters.ExcludesAny(keyword, values...)
 	if err != nil {
 		return nil, err
@@ -87,7 +309,7 @@ func (R *Read) AddFilterExcludesAny(keyword string, values ...interface{}) (*Rea
 	return R, nil
 }
 
-func (R *Read) AddFilterGreaterThan(keyword string, value interface{}) (*Read, error) {
+func (R *read) AddFilterGreaterThan(keyword string, value interface{}) (*read, error) {
 	f, err := filters.GreaterThan(keyword, value)
 	if err != nil {
 		return nil, err
@@ -96,7 +318,7 @@ func (R *Read) AddFilterGreaterThan(keyword string, value interface{}) (*Read, e
 	return R, nil
 }
 
-func (R *Read) AddFilterGreaterThanEqual(keyword string, value interface{}) (*Read, error) {
+func (R *read) AddFilterGreaterThanEqual(keyword string, value interface{}) (*read, error) {
 	f, err := filters.GreaterThanEqual(keyword, value)
 	if err != nil {
 		return nil, err
@@ -105,7 +327,7 @@ func (R *Read) AddFilterGreaterThanEqual(keyword string, value interface{}) (*Re
 	return R, nil
 }
 
-func (R *Read) AddFilterEqualsAnyOf(keyword string, values ...interface{}) (*Read, error) {
+func (R *read) AddFilterEqualsAnyOf(keyword string, values ...interface{}) (*read, error) {
 	f, err := filters.EqualsAnyOf(keyword, values...)
 	if err != nil {
 		return nil, err
@@ -114,7 +336,7 @@ func (R *Read) AddFilterEqualsAnyOf(keyword string, values ...interface{}) (*Rea
 	return R, nil
 }
 
-func (R *Read) AddFilterIncludes(keyword string, value interface{}) (*Read, error) {
+func (R *read) AddFilterIncludes(keyword string, value interface{}) (*read, error) {
 	f, err := filters.Includes(keyword, value)
 	if err != nil {
 		return nil, err
@@ -123,7 +345,7 @@ func (R *Read) AddFilterIncludes(keyword string, value interface{}) (*Read, erro
 	return R, nil
 }
 
-func (R *Read) AddFilterIncludesAny(keyword string, values ...interface{}) (*Read, error) {
+func (R *read) AddFilterIncludesAny(keyword string, values ...interface{}) (*read, error) {
 	f, err := filters.IncludesAny(keyword, values...)
 	if err != nil {
 		return nil, err
@@ -132,7 +354,7 @@ func (R *Read) AddFilterIncludesAny(keyword string, values ...interface{}) (*Rea
 	return R, nil
 }
 
-func (R *Read) AddFilterLessThan(keyword string, value interface{}) (*Read, error) {
+func (R *read) AddFilterLessThan(keyword string, value interface{}) (*read, error) {
 	f, err := filters.LessThan(keyword, value)
 	if err != nil {
 		return nil, err
@@ -141,7 +363,7 @@ func (R *Read) AddFilterLessThan(keyword string, value interface{}) (*Read, erro
 	return R, nil
 }
 
-func (R *Read) AddFilterLessThanEqual(keyword string, value interface{}) (*Read, error) {
+func (R *read) AddFilterLessThanEqual(keyword string, value interface{}) (*read, error) {
 	f, err := filters.LessThanEqual(keyword, value)
 	if err != nil {
 		return nil, err
@@ -150,7 +372,7 @@ func (R *Read) AddFilterLessThanEqual(keyword string, value interface{}) (*Read,
 	return R, nil
 }
 
-func (R *Read) AddFilterNotBeginWith(keyword string, value string) (*Read, error) {
+func (R *read) AddFilterNotBeginWith(keyword string, value string) (*read, error) {
 	f, err := filters.NotBeginWith(keyword, value)
 	if err != nil {
 		return nil, err
@@ -159,7 +381,7 @@ func (R *Read) AddFilterNotBeginWith(keyword string, value string) (*Read, error
 	return R, nil
 }
 
-func (R *Read) AddFilterNotBeginWithAny(keyword string, values ...string) (*Read, error) {
+func (R *read) AddFilterNotBeginWithAny(keyword string, values ...string) (*read, error) {
 	f, err := filters.NotBeginWithAny(keyword, values...)
 	if err != nil {
 		return nil, err
@@ -168,7 +390,7 @@ func (R *Read) AddFilterNotBeginWithAny(keyword string, values ...string) (*Read
 	return R, nil
 }
 
-func (R *Read) AddFilterNotEqualTo(keyword string, value interface{}) (*Read, error) {
+func (R *read) AddFilterNotEqualTo(keyword string, value interface{}) (*read, error) {
 	f, err := filters.NotEqualTo(keyword, value)
 	if err != nil {
 		return nil, err
@@ -177,7 +399,7 @@ func (R *Read) AddFilterNotEqualTo(keyword string, value interface{}) (*Read, er
 	return R, nil
 }
 
-func (R *Read) AddFilterNotEqualAnyOf(keyword string, values ...interface{}) (*Read, error) {
+func (R *read) AddFilterNotEqualAnyOf(keyword string, values ...interface{}) (*read, error) {
 	f, err := filters.NotEqualAnyOf(keyword, values...)
 	if err != nil {
 		return nil, err
@@ -186,35 +408,11 @@ func (R *Read) AddFilterNotEqualAnyOf(keyword string, values ...interface{}) (*R
 	return R, nil
 }
 
-func (R *Read) AddFilterSearch(keyword string, value string) (*Read, error) {
+func (R *read) AddFilterSearch(keyword string, value string) (*read, error) {
 	f, err := filters.Search(keyword, value)
 	if err != nil {
 		return nil, err
 	}
 	R.filter = f
 	return R, nil
-}
-
-func (R *Read) AddLimit(limit int) *Read {
-	R.limit = limit
-	return R
-}
-
-func (R *Read) AddGeoPoint(longitude, latitude float64) *Read {
-	R.geo = geocode.NewGeoPoint(longitude, latitude)
-	return R
-}
-
-func (R *Read) AddGeoCircle(longitude, latitude float64, radius int16) *Read {
-	R.geo = geocode.NewGeoPoint(longitude, latitude)
-	return R
-}
-
-func (R *Read) AddGeoRectangle(topRightLongitude, topRightLatitude, leftBottomLongitude, leftBottomLatitude float64) *Read {
-	R.geo = geocode.NewGeoRectangle(topRightLongitude, topRightLatitude, leftBottomLongitude, leftBottomLatitude)
-	return R
-}
-
-func (R *Read) ToJsonFromGeo() (string, error) {
-	return "", nil
 }
