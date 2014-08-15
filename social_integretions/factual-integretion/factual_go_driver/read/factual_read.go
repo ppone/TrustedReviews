@@ -58,7 +58,7 @@ func NewRead(tableName string) (*read, error) {
 
 }
 
-func NewSort(column string, sortOrderOrNumber string) sortData {
+func NewSort(column, sortOrderOrNumber string) sortData {
 	return sortData{column, sortOrderOrNumber}
 }
 
@@ -68,7 +68,7 @@ func (R *read) AddKey(key string) (*read, error) {
 		return nil, errors.New("key argument is empty")
 	}
 
-	R.key = key
+	R.key = "KEY=" + key
 
 	return R, nil
 
@@ -152,7 +152,7 @@ func (R *read) AddUser(user string) (*read, error) {
 		return nil, errors.New("user argument is empty")
 	}
 
-	R.user = user
+	R.user = "user=" + user
 
 	return R, nil
 
