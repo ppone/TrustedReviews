@@ -13,7 +13,7 @@ type read struct {
 	query         string
 	filter        string
 	limit         string
-	fact_table    table.FactTable
+	fact_table    string
 	geo           string
 	include_count string
 	sort          string
@@ -52,7 +52,7 @@ func NewRead(tableName string) (*read, error) {
 	}
 
 	read := new(read)
-	read.fact_table = tab
+	read.fact_table = tab.String()
 
 	return read, nil
 
@@ -60,6 +60,78 @@ func NewRead(tableName string) (*read, error) {
 
 func NewSort(column, sortOrderOrNumber string) sortData {
 	return sortData{column, sortOrderOrNumber}
+}
+
+/*
+type read struct {
+	query         string
+	filter        string
+	limit         string
+	fact_table    table.FactTable
+	geo           string
+	include_count string
+	sort          string
+	selectq       string
+	offset        string
+	threshold     string
+	key           string
+	user          string
+}*/
+
+func (R *read) String() string {
+	s := ""
+
+	if R.fact_table != "" {
+		s += R.fact_table
+		s += "?"
+
+	}
+
+	if R.query != "" {
+		s += R.query + "&"
+	}
+
+	if R.filter != "" {
+		s += R.filter + "&"
+	}
+
+	if R.limit != "" {
+		s += R.limit + "&"
+	}
+
+	if R.geo != "" {
+		s += R.geo + "&"
+	}
+
+	if R.include_count != "" {
+		s += R.include_count + "&"
+	}
+
+	if R.sort != "" {
+		s += R.sort + "&"
+	}
+
+	if R.selectq != "" {
+		s += R.selectq + "&"
+	}
+
+	if R.offset != "" {
+		s += R.offset + "&"
+	}
+
+	if R.threshold != "" {
+		s += R.threshold + "&"
+	}
+
+	if R.key != "" {
+		s += R.key + "&"
+	}
+
+	if R.user != "" {
+		s += R.user + "&"
+	}
+
+	return strings.TrimRight(s, "&")
 }
 
 func (R *read) AddKey(key string) (*read, error) {
