@@ -1,6 +1,7 @@
 package read
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -23,6 +24,26 @@ func TestCommaStringFromStringArray(t *testing.T) {
 	s, err = commaStringFromStringArray([]string{"hello", "goodbye", "s,oso"})
 
 	assertNotEqual(nil, err, t, "converstion allowed invalid arguments => ")
+}
+
+func TestString(t *testing.T) {
+	r, err := NewRead("restaurants-us")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	r.AddFilterBlank("city", true)
+	r.AddGeoPoint(2342.342, 12.123)
+	r.AddKey("RRRRRR")
+
+	assertEqual("/t/restaurants-us?filters={\"city\":{\"$blank\":true}}&geo={\"$point\":[2342.342,12.123]}&KEY=RRRRRR", r.String(), t, "string representation of read is wrong")
+
+	r.AddOffset(231)
+	r.AddQuery("starbucks X")
+	fmt.Println(r)
+
+	fmt.Println(r.fact_table)
 }
 
 func TestAddKey(t *testing.T) {
@@ -319,7 +340,7 @@ func TestRead(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	assertEqual(r.fact_table.ToJson(), "/t/restaurants-us", t, "Factual Table not properly stored in read struct")
+	assertEqual(r.fact_table, "/t/restaurants-us", t, "Factual Table not properly stored in read struct")
 
 	r, err = NewRead("prone to error")
 	if err == nil {
