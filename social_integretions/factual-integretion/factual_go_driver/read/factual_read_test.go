@@ -34,7 +34,7 @@ func TestAddKey(t *testing.T) {
 
 	r, err = r.AddKey("ASFW#Q1212987SFSDFLJLKJVXC")
 
-	assertEqual("ASFW#Q1212987SFSDFLJLKJVXC", r.key, t, "Key not stored properly in Read struct ")
+	assertEqual("KEY=ASFW#Q1212987SFSDFLJLKJVXC", r.key, t, "Key not stored properly in Read struct ")
 
 	r, err = r.AddKey("")
 
@@ -51,7 +51,7 @@ func TestAddUser(t *testing.T) {
 
 	r, err = r.AddUser("John Doe")
 
-	assertEqual("John Doe", r.user, t, "Key not stored properly in Read struct ")
+	assertEqual("user=John Doe", r.user, t, "Key not stored properly in Read struct ")
 
 	r, err = r.AddUser("")
 
