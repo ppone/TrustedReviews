@@ -47,6 +47,10 @@ func (Table FactTable) ToJson() string {
 	return "/t/" + Table.tableName
 }
 
+func (Table FactTable) String() string {
+	return "/t/" + Table.tableName
+}
+
 func main() {
 	tab, err := NewTable("places")
 	if err != nil {
