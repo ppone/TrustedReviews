@@ -2,8 +2,6 @@
 TODO: Need to consider making external functions more strongly typed.  Right now we infer the types at runtime, might be better
 to change arguments to specifc types instead of interface{}.   This will catch certain errors at compile time instead of waiting for
 runtime.
-
-
 */
 package filters
 
@@ -26,6 +24,45 @@ const (
 	numericT                 // = iota
 	stringAndNumericT        // = iota
 )
+
+type Filter interface {
+	String() string
+	Raw() string
+
+	/*
+		And(f1, f2 *filter) (*filter, error)
+		Or(f1, f2 *filter) (*filter, error)
+		Blank(keyword string, b bool) *filter
+		BeginsWith(keyword string, value string) (*filter, error)
+		BeginsWithAny(keyword string, values ...string) (*filter, error)
+		EqualTo(keyword string, value interface{}) (*filter, error)
+		Excludes(keyword string, value interface{}) (*filter, error)
+		ExcludesAny(keyword string, values ...interface{}) (*filter, error)
+		GreaterThan(keyword string, value interface{}) (*filter, error)
+		GreaterThanEqual(keyword string, value interface{}) (*filter, error)
+		EqualsAnyOf(keyword string, values ...interface{}) (*filter, error)
+		Includes(keyword string, values interface{}) (*filter, error)
+		IncludesAny(keyword string, values ...interfasce{}) (*filter, error)
+		LessThan(keyword string, value interface{}) (*filter, error)
+		LessThanEqual(keyword string, values interface{}) (*filter, error)
+		NotBeginWith(keyword string, value string) (*filter, error)
+		NotBeginWithAny(keyword string, values ...string) (*filter, error)
+		NotEqualTo(keyword string, value interface{}) (*filter, error)
+		NotEqualAnyOf(keyword string, values ...interface{}) (*filter, error)
+		Search(keyword string, value string) (*filter, error)*/
+}
+
+type filter struct {
+	filterValue string
+}
+
+func (F *filter) String() string {
+	return "filters=" + F.filterValue
+}
+
+func (F *filter) Raw() string {
+	return F.filterValue
+}
 
 func truncateLastZeroInFloatString(s string) string {
 	splitedString := strings.Split(s, ".")
@@ -196,283 +233,304 @@ func checkTypesInArray(values []interface{}, acceptedTypes jsType) (string, erro
 
 }
 
-func returnJsonString(keyword, operator string, value interface{}) (string, error) {
-	filterString := "filters="
+func returnFilter(keyword, operator string, value interface{}) (*filter, error) {
 
 	switch v := value.(type) {
 	case int:
-		return filterString + "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + intToString(v) + "}}", nil
+		return &filter{"{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + intToString(v) + "}}"}, nil
 	case float64:
-		return filterString + "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + floatToString(v) + "}}", nil
+		return &filter{"{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + floatToString(v) + "}}"}, nil
 	case string:
-		return filterString + "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":\"" + v + "\"}}", nil
+		return &filter{"{" + "\"" + keyword + "\":" + "{\"" + operator + "\":\"" + v + "\"}}"}, nil
 	case []string:
 
 		unboxedValue, err := returnJsonArray(value)
 
 		if err != nil {
-			return "", err
+			return nil, err
 		}
-		return filterString + "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + unboxedValue + "}}", nil
+		return &filter{"{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + unboxedValue + "}}"}, nil
 	case []int:
 		unboxedValue, err := returnJsonArray(value)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
-		return "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + unboxedValue + "\"}}", nil
+		return &filter{"{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + unboxedValue + "\"}}"}, nil
 	case []float64:
 		unboxedValue, err := returnJsonArray(value)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
-		return filterString + "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + unboxedValue + "\"}}", nil
+		return &filter{"{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + unboxedValue + "\"}}"}, nil
 	case []interface{}:
 		unboxedValue, err := returnJsonArray(value)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
-		return filterString + "{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + unboxedValue + "}}", nil
+		return &filter{"{" + "\"" + keyword + "\":" + "{\"" + operator + "\":" + unboxedValue + "}}"}, nil
 
 	default:
-		return "", errors.New("Error: Accepts only Text or Numeric Types")
+		return nil, errors.New("Error: Accepts only Text or Numeric Types")
 
 	}
 
 }
 
-func Blank(keyword string, b bool) string {
+func And(f1, f2 Filter) (Filter, error) {
+	if f1 == nil || f2 == nil {
+		return nil, errors.New("filter1 or filter2 cannot be nil")
+	}
+
+	s := "{\"$and\":[" + f1.Raw() + "," + f2.Raw() + "]}"
+
+	return &filter{s}, nil
+
+}
+
+func Or(f1, f2 Filter) (Filter, error) {
+	if f1 == nil || f2 == nil {
+		return nil, errors.New("filter1 or filter2 cannot be nil")
+	}
+
+	s := "{\"$or\":[" + f1.Raw() + "," + f2.Raw() + "]}"
+
+	return &filter{s}, nil
+
+}
+
+func Blank(keyword string, b bool) Filter {
 	if b == true {
-		return "filters={\"" + keyword + "\":" + "{\"$blank\":true}}"
+		return &filter{"{\"" + keyword + "\":" + "{\"$blank\":true}}"}
 	} else {
-		return "filters={\"" + keyword + "\":" + "{\"$blank\":false}}"
+		return &filter{"{\"" + keyword + "\":" + "{\"$blank\":false}}"}
 	}
 }
 
-func BeginsWith(keyword string, value string) (string, error) {
-	jsonString, err := returnJsonString(keyword, "$bw", value)
+func BeginsWith(keyword string, value string) (Filter, error) {
+	filterPointer, err := returnFilter(keyword, "$bw", value)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return jsonString, nil
+	return filterPointer, nil
 }
 
-func BeginsWithAny(keyword string, values ...string) (string, error) {
-	jsonString, err := returnJsonString(keyword, "$bwin", values)
+func BeginsWithAny(keyword string, values ...string) (Filter, error) {
+	filterPointer, err := returnFilter(keyword, "$bwin", values)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return jsonString, nil
+	return filterPointer, nil
 
 }
 
-func EqualTo(keyword string, value interface{}) (string, error) {
+func EqualTo(keyword string, value interface{}) (Filter, error) {
 	_, errA := checkTypes(value, stringAndNumericT)
 
 	if errA != nil {
-		return "", errA
+		return nil, errA
 	}
 
-	jsonString, err := returnJsonString(keyword, "$eq", value)
+	filterPointer, err := returnFilter(keyword, "$eq", value)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return jsonString, nil
+	return filterPointer, nil
 
 }
 
-func Excludes(keyword string, value interface{}) (string, error) {
+func Excludes(keyword string, value interface{}) (Filter, error) {
 	_, errA := checkTypes(value, stringAndNumericT)
 
 	if errA != nil {
-		return "", errA
+		return nil, errA
 	}
 
-	jsonString, err := returnJsonString(keyword, "$excludes", value)
+	filterPointer, err := returnFilter(keyword, "$excludes", value)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return jsonString, nil
+	return filterPointer, nil
 
 }
 
-func ExcludesAny(keyword string, values ...interface{}) (string, error) {
+func ExcludesAny(keyword string, values ...interface{}) (Filter, error) {
 	_, errA := checkTypesInArray(values, stringAndNumericT)
 
 	if errA != nil {
-		return "", errA
+		return nil, errA
 	}
 
-	jsonString, err := returnJsonString(keyword, "$excludes_any", values)
+	filterPointer, err := returnFilter(keyword, "$excludes_any", values)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return jsonString, nil
+	return filterPointer, nil
 
 }
 
-func GreaterThan(keyword string, value interface{}) (string, error) {
+func GreaterThan(keyword string, value interface{}) (Filter, error) {
 
 	_, errA := checkTypes(value, numericT)
 
 	if errA != nil {
-		return "", errA
+		return nil, errA
 	}
 
-	jsonString, err := returnJsonString(keyword, "$gt", value)
+	filterPointer, err := returnFilter(keyword, "$gt", value)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return jsonString, nil
+	return filterPointer, nil
 
 }
 
-func GreaterThanEqual(keyword string, value interface{}) (string, error) {
+func GreaterThanEqual(keyword string, value interface{}) (Filter, error) {
 
 	_, errA := checkTypes(value, numericT)
 
 	if errA != nil {
-		return "", errA
+		return nil, errA
 	}
 
-	jsonString, err := returnJsonString(keyword, "$gte", value)
+	filterPointer, err := returnFilter(keyword, "$gte", value)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return jsonString, nil
+	return filterPointer, nil
 
 }
 
-func EqualsAnyOf(keyword string, values ...interface{}) (string, error) {
+func EqualsAnyOf(keyword string, values ...interface{}) (Filter, error) {
 	_, errA := checkTypesInArray(values, stringAndNumericT)
 
 	if errA != nil {
-		return "", errA
+		return nil, errA
 	}
 
-	jsonString, err := returnJsonString(keyword, "$in", values)
+	filterPointer, err := returnFilter(keyword, "$in", values)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return jsonString, nil
+	return filterPointer, nil
 
 }
 
-func Includes(keyword string, values interface{}) (string, error) {
+func Includes(keyword string, values interface{}) (Filter, error) {
 	_, errA := checkTypes(values, stringAndNumericT)
 
 	if errA != nil {
-		return "", errA
+		return nil, errA
 	}
 
-	jsonString, err := returnJsonString(keyword, "$includes", values)
+	filterPointer, err := returnFilter(keyword, "$includes", values)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return jsonString, nil
+	return filterPointer, nil
 
 }
 
-func IncludesAny(keyword string, values ...interface{}) (string, error) {
+func IncludesAny(keyword string, values ...interface{}) (Filter, error) {
 	_, errA := checkTypesInArray(values, stringAndNumericT)
 
 	if errA != nil {
-		return "", errA
+		return nil, errA
 	}
-	jsonString, err := returnJsonString(keyword, "$includes_any", values)
+	filterPointer, err := returnFilter(keyword, "$includes_any", values)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return jsonString, nil
+	return filterPointer, nil
 
 }
 
-func LessThan(keyword string, value interface{}) (string, error) {
+func LessThan(keyword string, value interface{}) (Filter, error) {
 	_, errA := checkTypes(value, numericT)
 
 	if errA != nil {
-		return "", errA
+		return nil, errA
 	}
 
-	jsonString, err := returnJsonString(keyword, "$lt", value)
+	filterPointer, err := returnFilter(keyword, "$lt", value)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return jsonString, nil
+	return filterPointer, nil
 
 }
 
-func LessThanEqual(keyword string, values interface{}) (string, error) {
+func LessThanEqual(keyword string, values interface{}) (Filter, error) {
 	_, errA := checkTypes(values, numericT)
 
 	if errA != nil {
-		return "", errA
+		return nil, errA
 	}
-	jsonString, err := returnJsonString(keyword, "$lte", values)
+	filterPointer, err := returnFilter(keyword, "$lte", values)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return jsonString, nil
+	return filterPointer, nil
 
 }
 
-func NotBeginWith(keyword string, value string) (string, error) {
+func NotBeginWith(keyword string, value string) (Filter, error) {
 
-	jsonString, err := returnJsonString(keyword, "$nbw", value)
+	filterPointer, err := returnFilter(keyword, "$nbw", value)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return jsonString, nil
+	return filterPointer, nil
 
 }
 
-func NotBeginWithAny(keyword string, values ...string) (string, error) {
+func NotBeginWithAny(keyword string, values ...string) (Filter, error) {
 
-	jsonString, err := returnJsonString(keyword, "$nbwin", values)
+	filterPointer, err := returnFilter(keyword, "$nbwin", values)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return jsonString, nil
+	return filterPointer, nil
 
 }
 
-func NotEqualTo(keyword string, value interface{}) (string, error) {
+func NotEqualTo(keyword string, value interface{}) (Filter, error) {
 
 	_, errA := checkTypes(value, stringAndNumericT)
 
 	if errA != nil {
-		return "", errA
+		return nil, errA
 	}
 
-	jsonString, err := returnJsonString(keyword, "$neq", value)
+	filterPointer, err := returnFilter(keyword, "$neq", value)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return jsonString, nil
+	return filterPointer, nil
 
 }
 
-func NotEqualAnyOf(keyword string, values ...interface{}) (string, error) {
+func NotEqualAnyOf(keyword string, values ...interface{}) (Filter, error) {
 
 	_, errA := checkTypesInArray(values, stringAndNumericT)
 
 	if errA != nil {
-		return "", errA
+		return nil, errA
 	}
 
-	jsonString, err := returnJsonString(keyword, "$nin", values)
+	filterPointer, err := returnFilter(keyword, "$nin", values)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return jsonString, nil
+	return filterPointer, nil
 
 }
 
-func Search(keyword string, value string) (string, error) {
+func Search(keyword string, value string) (Filter, error) {
 
-	jsonString, err := returnJsonString(keyword, "$search", value)
+	filterPointer, err := returnFilter(keyword, "$search", value)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return jsonString, nil
+	return filterPointer, nil
 
 }
