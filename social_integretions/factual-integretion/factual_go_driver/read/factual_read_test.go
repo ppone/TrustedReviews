@@ -1,9 +1,24 @@
 package read
 
 import (
+	"../filters"
 	"fmt"
 	"testing"
 )
+
+func TestReadAssignment(t *testing.T) {
+	/*var R Read
+	var err error
+	R, err = NewRead("restaurants-us")
+	if err != nil {
+		t.Error(err)
+	}
+	R.AddFilterBlank("heppy", true)
+	R.AddLimit(5)
+	//R.AddFilterExcludes("fish", "bluefin")
+
+	fmt.Println("yea yo", R.String())*/
+}
 
 func TestCommaStringFromStringArray(t *testing.T) {
 	s, err := commaStringFromStringArray([]string{"hello", "goodbye", "soso"})
@@ -60,6 +75,96 @@ func TestAddKey(t *testing.T) {
 	r, err = r.AddKey("")
 
 	assertNotEqual(nil, err, t, "error was not thrown")
+
+}
+
+func TestAddAndFilter(t *testing.T) {
+	r, err := NewRead("restaurants-us")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	f1, err := filters.LessThan("age", 30)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	f2 := filters.Blank("city", true)
+
+	r1, err := r.AddAndFilter(f1, f2)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	fmt.Println(r1.filter)
+
+	assertEqual("filters={\"$and\":[{\"age\":{\"$lt\":30}},{\"city\":{\"$blank\":true}}]}", r1.filter, t, "filter not stored properly")
+
+	f3, err := filters.Or(f1, f2)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	f4, err := filters.Search("name", "parag")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	r2, err := r.AddAndFilter(f3, f4)
+
+	fmt.Println(r2.filter)
+
+	assertEqual("filters={\"$and\":[{\"$or\":[{\"age\":{\"$lt\":30}},{\"city\":{\"$blank\":true}}]},{\"name\":{\"$search\":\"parag\"}}]}", r2.filter, t, "filter not stored properly")
+
+}
+
+func TestAddOrFilter(t *testing.T) {
+	r, err := NewRead("restaurants-us")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	f1, err := filters.LessThan("age", 30)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	f2 := filters.Blank("city", true)
+
+	r1, err := r.AddOrFilter(f1, f2)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	fmt.Println(r1.filter)
+
+	assertEqual("filters={\"$or\":[{\"age\":{\"$lt\":30}},{\"city\":{\"$blank\":true}}]}", r1.filter, t, "filter not stored properly")
+
+	f3, err := filters.And(f1, f2)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	f4, err := filters.Search("name", "parag")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	r2, err := r.AddOrFilter(f3, f4)
+
+	fmt.Println(r2.filter)
+
+	assertEqual("filters={\"$or\":[{\"$and\":[{\"age\":{\"$lt\":30}},{\"city\":{\"$blank\":true}}]},{\"name\":{\"$search\":\"parag\"}}]}", r2.filter, t, "filter not stored properly")
 
 }
 
