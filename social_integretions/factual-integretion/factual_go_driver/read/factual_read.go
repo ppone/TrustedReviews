@@ -9,6 +9,40 @@ import (
 	"strings"
 )
 
+type Read interface {
+	String() string
+	AddKey(key string) (*read, error)
+	AddSort(sorts ...sortData) (*read, error)
+	AddUser(user string) (*read, error)
+	AddQuery(queries ...string) (*read, error)
+	AddSelect(selects ...string) (*read, error)
+	AddIncludeCount(include_count bool) *read
+	AddLimit(limit int) *read
+	AddOffset(offset int) *read
+	AddThreshold(threshold string) (*read, error)
+	AddGeoPoint(longitude, latitude float64) (*read, error)
+	AddGeoCircle(longitude, latitude float64, radius int16) (*read, error)
+	AddGeoRectangle(topRightLongitude, topRightLatitude, leftBottomLongitude, leftBottomLatitude float64) (*read, error)
+	AddFilterBlank(keyword string, b bool) *read
+	AddFilterBeginsWith(keyword string, value string) (*read, error)
+	AddFilterBeginsWithAny(keyword string, values ...string) (*read, error)
+	AddFilterEqualTo(keyword string, value string) (*read, error)
+	AddFilterExcludes(keyword string, value interface{}) (*read, error)
+	AddFilterExcludesAny(keyword string, values ...interface{}) (*read, error)
+	AddFilterGreaterThan(keyword string, value interface{}) (*read, error)
+	AddFilterGreaterThanEqual(keyword string, value interface{}) (*read, error)
+	AddFilterEqualsAnyOf(keyword string, values ...interface{}) (*read, error)
+	AddFilterIncludes(keyword string, value interface{}) (*read, error)
+	AddFilterIncludesAny(keyword string, values ...interface{}) (*read, error)
+	AddFilterLessThan(keyword string, value interface{}) (*read, error)
+	AddFilterLessThanEqual(keyword string, value interface{}) (*read, error)
+	AddFilterNotBeginWith(keyword string, value string) (*read, error)
+	AddFilterNotBeginWithAny(keyword string, values ...string) (*read, error)
+	AddFilterNotEqualTo(keyword string, value interface{}) (*read, error)
+	AddFilterNotEqualAnyOf(keyword string, values ...interface{}) (*read, error)
+	AddFilterSearch(keyword string, value string) (*read, error)
+}
+
 type read struct {
 	query         string
 	filter        string
@@ -43,8 +77,19 @@ func commaStringFromStringArray(stringArray []string) (string, error) {
 	return strings.TrimRight(commaString, ","), nil
 
 }
+func NewReader(tableName string) (Read, error) {
+	var R Read
+	var err error
+	R, err = NewRead("restaurants-us")
+	if err != nil {
+		return nil, err
+	}
+
+	return R, nil
+}
 
 func NewRead(tableName string) (*read, error) {
+
 	tab, err := table.NewTable(tableName)
 
 	if err != nil {
@@ -132,6 +177,28 @@ func (R *read) String() string {
 	}
 
 	return strings.TrimRight(s, "&")
+}
+
+func (R *read) AddAndFilter(f1, f2 filters.Filter) (*read, error) {
+	fand, err := filters.And(f1, f2)
+	if err != nil {
+		return nil, err
+	}
+	R.filter = fand.String()
+
+	return R, nil
+
+}
+
+func (R *read) AddOrFilter(f1, f2 filters.Filter) (*read, error) {
+	fOr, err := filters.Or(f1, f2)
+	if err != nil {
+		return nil, err
+	}
+	R.filter = fOr.String()
+
+	return R, nil
+
 }
 
 func (R *read) AddKey(key string) (*read, error) {
@@ -333,7 +400,7 @@ func (R *read) AddGeoRectangle(topRightLongitude, topRightLatitude, leftBottomLo
 
 func (R *read) AddFilterBlank(keyword string, b bool) *read {
 	f := filters.Blank(keyword, b)
-	R.filter = f
+	R.filter = f.String()
 	return R
 }
 func (R *read) AddFilterBeginsWith(keyword string, value string) (*read, error) {
@@ -341,7 +408,7 @@ func (R *read) AddFilterBeginsWith(keyword string, value string) (*read, error) 
 	if err != nil {
 		return nil, err
 	}
-	R.filter = f
+	R.filter = f.String()
 	return R, nil
 }
 
@@ -350,7 +417,7 @@ func (R *read) AddFilterBeginsWithAny(keyword string, values ...string) (*read, 
 	if err != nil {
 		return nil, err
 	}
-	R.filter = f
+	R.filter = f.String()
 	return R, nil
 }
 
@@ -359,7 +426,7 @@ func (R *read) AddFilterEqualTo(keyword string, value string) (*read, error) {
 	if err != nil {
 		return nil, err
 	}
-	R.filter = f
+	R.filter = f.String()
 	return R, nil
 }
 
@@ -368,7 +435,7 @@ func (R *read) AddFilterExcludes(keyword string, value interface{}) (*read, erro
 	if err != nil {
 		return nil, err
 	}
-	R.filter = f
+	R.filter = f.String()
 	return R, nil
 }
 
@@ -377,7 +444,7 @@ func (R *read) AddFilterExcludesAny(keyword string, values ...interface{}) (*rea
 	if err != nil {
 		return nil, err
 	}
-	R.filter = f
+	R.filter = f.String()
 	return R, nil
 }
 
@@ -386,7 +453,7 @@ func (R *read) AddFilterGreaterThan(keyword string, value interface{}) (*read, e
 	if err != nil {
 		return nil, err
 	}
-	R.filter = f
+	R.filter = f.String()
 	return R, nil
 }
 
@@ -395,7 +462,7 @@ func (R *read) AddFilterGreaterThanEqual(keyword string, value interface{}) (*re
 	if err != nil {
 		return nil, err
 	}
-	R.filter = f
+	R.filter = f.String()
 	return R, nil
 }
 
@@ -404,7 +471,7 @@ func (R *read) AddFilterEqualsAnyOf(keyword string, values ...interface{}) (*rea
 	if err != nil {
 		return nil, err
 	}
-	R.filter = f
+	R.filter = f.String()
 	return R, nil
 }
 
@@ -413,7 +480,7 @@ func (R *read) AddFilterIncludes(keyword string, value interface{}) (*read, erro
 	if err != nil {
 		return nil, err
 	}
-	R.filter = f
+	R.filter = f.String()
 	return R, nil
 }
 
@@ -422,7 +489,7 @@ func (R *read) AddFilterIncludesAny(keyword string, values ...interface{}) (*rea
 	if err != nil {
 		return nil, err
 	}
-	R.filter = f
+	R.filter = f.String()
 	return R, nil
 }
 
@@ -431,7 +498,7 @@ func (R *read) AddFilterLessThan(keyword string, value interface{}) (*read, erro
 	if err != nil {
 		return nil, err
 	}
-	R.filter = f
+	R.filter = f.String()
 	return R, nil
 }
 
@@ -440,7 +507,7 @@ func (R *read) AddFilterLessThanEqual(keyword string, value interface{}) (*read,
 	if err != nil {
 		return nil, err
 	}
-	R.filter = f
+	R.filter = f.String()
 	return R, nil
 }
 
@@ -449,7 +516,7 @@ func (R *read) AddFilterNotBeginWith(keyword string, value string) (*read, error
 	if err != nil {
 		return nil, err
 	}
-	R.filter = f
+	R.filter = f.String()
 	return R, nil
 }
 
@@ -458,7 +525,7 @@ func (R *read) AddFilterNotBeginWithAny(keyword string, values ...string) (*read
 	if err != nil {
 		return nil, err
 	}
-	R.filter = f
+	R.filter = f.String()
 	return R, nil
 }
 
@@ -467,7 +534,7 @@ func (R *read) AddFilterNotEqualTo(keyword string, value interface{}) (*read, er
 	if err != nil {
 		return nil, err
 	}
-	R.filter = f
+	R.filter = f.String()
 	return R, nil
 }
 
@@ -476,7 +543,7 @@ func (R *read) AddFilterNotEqualAnyOf(keyword string, values ...interface{}) (*r
 	if err != nil {
 		return nil, err
 	}
-	R.filter = f
+	R.filter = f.String()
 	return R, nil
 }
 
@@ -485,6 +552,6 @@ func (R *read) AddFilterSearch(keyword string, value string) (*read, error) {
 	if err != nil {
 		return nil, err
 	}
-	R.filter = f
+	R.filter = f.String()
 	return R, nil
 }
