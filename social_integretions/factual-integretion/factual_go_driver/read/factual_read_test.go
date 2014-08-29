@@ -1,24 +1,10 @@
 package read
 
 import (
-	"../filters"
+	"./filters"
 	"fmt"
 	"testing"
 )
-
-func TestReadAssignment(t *testing.T) {
-	/*var R Read
-	var err error
-	R, err = NewRead("restaurants-us")
-	if err != nil {
-		t.Error(err)
-	}
-	R.AddFilterBlank("heppy", true)
-	R.AddLimit(5)
-	//R.AddFilterExcludes("fish", "bluefin")
-
-	fmt.Println("yea yo", R.String())*/
-}
 
 func TestCommaStringFromStringArray(t *testing.T) {
 	s, err := commaStringFromStringArray([]string{"hello", "goodbye", "soso"})
