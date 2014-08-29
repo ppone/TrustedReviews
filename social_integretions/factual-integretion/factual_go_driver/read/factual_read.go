@@ -1,9 +1,9 @@
 package read
 
 import (
-	"../filters"
-	"../geocode"
 	"../table"
+	"./filters"
+	"./geocode"
 	"errors"
 	"strconv"
 	"strings"
