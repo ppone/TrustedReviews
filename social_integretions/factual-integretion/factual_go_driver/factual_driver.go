@@ -83,9 +83,16 @@ func (T tokenOauth) Get(url string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer result.Body.Close()
 
-	fmt.Println("Throttle Allocation => ", result.Header.Get("X-Factual-Throttle-Allocation"))
+	fmt.Println(result)
+
+	defer func() {
+		err := result.Body.Close()
+		if err != nil {
+			panic(err)
+		}
+	}()
+
 	content, err := ioutil.ReadAll(result.Body)
 
 	if err != nil {
